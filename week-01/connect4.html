@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1f8;
+    --bg-2: #dfe5f3;
+    --surface: #ffffff;
+    --text: #18203a;
+    --muted: #66708c;
+    --line: #d5dbea;
+    --board: #2447c4;
+    --board-dark: #18308f;
+    --p1: #f0475b;
+    --p1-light: #ff8a96;
+    --p1-dark: #b3263a;
+    --p2: #f7c23c;
+    --p2-light: #ffe28a;
+    --p2-dark: #c68e10;
+    --accent: #2447c4;
+    --shadow: 0 18px 40px -18px rgba(24, 40, 100, .45);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1424;
+      --bg-2: #161d33;
+      --surface: #1b2340;
+      --text: #eef1fb;
+      --muted: #97a1c0;
+      --line: #2b3558;
+      --board: #2b52d9;
+      --board-dark: #1a3396;
+      --accent: #7f9cff;
+      --shadow: 0 18px 40px -18px rgba(0, 0, 0, .8);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text);
+    background: radial-gradient(ellipse at top, var(--bg-2), var(--bg) 60%);
+    background-color: var(--bg);
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 40px;
+  }
+  .app {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+  h1 span { color: var(--p1); }
+  h1 span + span { color: var(--p2); }
+  .reset-score {
+    background: none; border: 0; color: var(--muted); font: inherit; font-size: 13px;
+    cursor: pointer; padding: 4px; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .reset-score:hover { color: var(--text); }
+
+  .scores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .score {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 10px 12px; display: flex; align-items: center; gap: 10px;
+  }
+  .score .chip { width: 18px; height: 18px; border-radius: 50%; flex: none; }
+  .score .chip.p1 { background: var(--p1); }
+  .score .chip.p2 { background: var(--p2); }
+  .score .chip.draw { background: var(--line); }
+  .score .label { font-size: 12px; color: var(--muted); line-height: 1.2; }
+  .score .num { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+  .group { display: flex; flex-direction: column; gap: 4px; }
+  .group-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .seg {
+    display: inline-flex; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 3px;
+  }
+  .seg button {
+    font: inherit; font-size: 13px; font-weight: 600; border: 0; background: none; color: var(--muted);
+    padding: 6px 12px; border-radius: 7px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .seg button:not([aria-pressed="true"]):hover { color: var(--text); }
+  .new-game {
+    font: inherit; font-weight: 700; font-size: 14px; border: 0; cursor: pointer;
+    background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 10px;
+    align-self: flex-end; transition: transform .1s;
+  }
+  .new-game:active { transform: scale(.97); }
+
+  .status {
+    text-align: center; font-size: 18px; font-weight: 700; min-height: 28px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .status .chip { width: 16px; height: 16px; border-radius: 50%; }
+  .status .chip.p1 { background: var(--p1); }
+  .status .chip.p2 { background: var(--p2); }
+  .status.over { font-size: 22px; animation: pop .35s ease-out; }
+  .dots::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .play-area { display: flex; flex-direction: column; gap: 6px; }
+  .ghost-row { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 10px; aspect-ratio: 7 / 1; }
+  .ghost-row .disc { opacity: 0; transition: opacity .15s; }
+  .ghost-row .disc.show { opacity: .55; }
+
+  .board-wrap {
+    background: var(--board); border-radius: 18px; padding: 10px;
+    box-shadow: var(--shadow), inset 0 -6px 0 var(--board-dark);
+  }
+  .board { position: relative; aspect-ratio: 7 / 6; overflow: hidden; border-radius: 10px; }
+  .layer { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); }
+  .discs { z-index: 1; }
+  .frame { z-index: 2; pointer-events: none; }
+  .hole {
+    background: radial-gradient(circle closest-side,
+      transparent 79%, rgba(0, 0, 0, .35) 80.5%, var(--board) 88%);
+  }
+  .cols { z-index: 3; display: flex; }
+  .cols button {
+    flex: 1; border: 0; background: transparent; cursor: pointer; padding: 0;
+    transition: background .15s;
+  }
+  .cols button:hover, .cols button:focus-visible { background: rgba(255, 255, 255, .08); outline: none; }
+  .board.locked .cols button { cursor: default; }
+  .board.locked .cols button:hover { background: transparent; }
+
+  .disc {
+    width: 80%; aspect-ratio: 1; border-radius: 50%; place-self: center; position: relative;
+  }
+  .disc.p1 {
+    background: radial-gradient(circle at 35% 30%, var(--p1-light), var(--p1) 45%, var(--p1-dark));
+    box-shadow: inset 0 0 0 4px rgba(0, 0, 0, .12), inset 0 -3px 6px rgba(0, 0, 0, .2);
+  }
+  .disc.p2 {
+    background: radial-gradient(circle at 35% 30%, var(--p2-light), var(--p2) 45%, var(--p2-dark));
+    box-shadow: inset 0 0 0 4px rgba(0, 0, 0, .1), inset 0 -3px 6px rgba(0, 0, 0, .18);
+  }
+  .discs .disc { animation: drop 400ms both; }
+  @keyframes drop {
+    0% { transform: translateY(calc((var(--r) + .3) * -122%)); animation-timing-function: cubic-bezier(.55, 0, 1, .45); }
+    72% { transform: translateY(0); animation-timing-function: ease-out; }
+    84% { transform: translateY(-8%); animation-timing-function: ease-in; }
+    100% { transform: translateY(0); }
+  }
+  .disc.last::after {
+    content: ""; position: absolute; inset: 38%; border-radius: 50%;
+    background: rgba(255, 255, 255, .7);
+  }
+  .board.ended .discs .disc:not(.win) { opacity: .35; transition: opacity .4s; }
+  .discs .disc.win { animation: win 1s ease-in-out infinite alternate; }
+  .disc.win::after { display: none; }
+  @keyframes win {
+    from { transform: scale(1); filter: brightness(1); }
+    to { transform: scale(.88); filter: brightness(1.2); }
+  }
+
+  .hint { text-align: center; font-size: 13px; color: var(--muted); margin: 0; }
+  kbd {
+    font-family: inherit; font-size: 12px; background: var(--surface); border: 1px solid var(--line);
+    border-bottom-width: 2px; border-radius: 4px; padding: 0 5px;
+  }
+
+  @media (max-width: 420px) {
+    h1 { font-size: 24px; }
+    .score { padding: 8px; gap: 8px; }
+    .score .num { font-size: 18px; }
+    .board-wrap { padding: 6px; border-radius: 14px; }
+    .ghost-row { padding: 0 6px; }
+    .new-game { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .discs .disc, .discs .disc.win, .status.over { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <h1>Connect <span>4</span></h1>
+    <button class="reset-score" id="resetScore" type="button">Reset score</button>
+  </header>
+
+  <section class="scores" aria-label="Score">
+    <div class="score"><span class="chip p1"></span><div><div class="label">You</div><div class="num" id="sHuman">0</div></div></div>
+    <div class="score"><span class="chip draw"></span><div><div class="label">Draws</div><div class="num" id="sDraw">0</div></div></div>
+    <div class="score"><span class="chip p2"></span><div><div class="label">Computer</div><div class="num" id="sAI">0</div></div></div>
+  </section>
+
+  <section class="controls">
+    <div class="group">
+      <span class="group-label">Difficulty</span>
+      <div class="seg" id="difficulty">
+        <button type="button" data-v="easy">Easy</button>
+        <button type="button" data-v="medium">Medium</button>
+        <button type="button" data-v="hard">Hard</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="group-label">First move</span>
+      <div class="seg" id="starter">
+        <button type="button" data-v="human">You</button>
+        <button type="button" data-v="ai">Computer</button>
+      </div>
+    </div>
+    <button class="new-game" id="newGame" type="button">New game</button>
+  </section>
+
+  <div class="status" id="status" aria-live="polite"></div>
+
+  <section class="play-area">
+    <div class="ghost-row" aria-hidden="true"><div class="disc p1" id="ghost"></div></div>
+    <div class="board-wrap">
+      <div class="board" id="board">
+        <div class="layer discs" id="discs"></div>
+        <div class="layer frame" id="frame"></div>
+        <div class="layer cols" id="cols"></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="hint">Click a column or press <kbd>1</kbd>–<kbd>7</kbd> to drop a disc.</p>
+</main>
+
+<script>
+const ROWS = 6, COLS = 7, HUMAN = 1, AI = 2, WIN = 1e6;
+const ORDER = [3, 2, 4, 1, 5, 0, 6];
+const DEPTH = { easy: 1, medium: 4, hard: 7 };
+
+// Every line of four cells on the board, plus an index of which lines pass through each cell.
+const WINDOWS = [];
+for (let r = 0; r < ROWS; r++) {
+  for (let c = 0; c < COLS; c++) {
+    const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
+    for (const [dr, dc] of dirs) {
+      const er = r + dr * 3, ec = c + dc * 3;
+      if (er < 0 || er >= ROWS || ec < 0 || ec >= COLS) continue;
+      WINDOWS.push([0, 1, 2, 3].map(k => (r + dr * k) * COLS + (c + dc * k)));
+    }
+  }
+}
+const CELL_WINDOWS = Array.from({ length: ROWS * COLS }, () => []);
+for (const w of WINDOWS) for (const i of w) CELL_WINDOWS[i].push(w);
+
+const $ = id => document.getElementById(id);
+const boardEl = $("board"), discsEl = $("discs"), ghost = $("ghost"), statusEl = $("status");
+
+let board, discEls, moves, current, gameOver, busy, gameId = 0, hoverCol = null;
+let difficulty = "medium", starter = "human";
+let score = { human: 0, ai: 0, draw: 0 };
+
+// ---------- game rules ----------
+function lowestRow(b, c) {
+  for (let r = ROWS - 1; r >= 0; r--) if (!b[r * COLS + c]) return r;
+  return -1;
+}
+
+function winningCells(b, i, p) {
+  const cells = new Set();
+  for (const w of CELL_WINDOWS[i]) if (w.every(j => b[j] === p)) w.forEach(j => cells.add(j));
+  return cells.size ? [...cells] : null;
+}
+
+function isWinAt(b, i, p) {
+  for (const w of CELL_WINDOWS[i]) {
+    if (b[w[0]] === p && b[w[1]] === p && b[w[2]] === p && b[w[3]] === p) return true;
+  }
+  return false;
+}
+
+// ---------- computer player: negamax with alpha-beta pruning ----------
+function evaluate(b, p) {
+  const o = 3 - p;
+  let s = 0;
+  for (let r = 0; r < ROWS; r++) {
+    const v = b[r * COLS + 3];
+    if (v === p) s += 3; else if (v === o) s -= 3;
+  }
+  for (const w of WINDOWS) {
+    let mine = 0, theirs = 0;
+    for (const j of w) { if (b[j] === p) mine++; else if (b[j] === o) theirs++; }
+    if (theirs === 0) { if (mine === 3) s += 5; else if (mine === 2) s += 2; }
+    else if (mine === 0) { if (theirs === 3) s -= 6; else if (theirs === 2) s -= 2; }
+  }
+  return s;
+}
+
+function negamax(b, depth, alpha, beta, p, played) {
+  if (played === ROWS * COLS) return 0;
+  if (depth === 0) return evaluate(b, p);
+  let best = -Infinity;
+  for (const c of ORDER) {
+    const r = lowestRow(b, c);
+    if (r < 0) continue;
+    const i = r * COLS + c;
+    b[i] = p;
+    const score = isWinAt(b, i, p) ? WIN + depth : -negamax(b, depth - 1, -beta, -alpha, 3 - p, played + 1);
+    b[i] = 0;
+    if (score > best) best = score;
+    if (score > alpha) alpha = score;
+    if (alpha >= beta) break;
+  }
+  return best;
+}
+
+function chooseMove() {
+  const b = board.slice();
+  const depth = DEPTH[difficulty];
+  let bestScore = -Infinity, best = [];
+  for (const c of ORDER) {
+    const r = lowestRow(b, c);
+    if (r < 0) continue;
+    const i = r * COLS + c;
+    b[i] = AI;
+    let s = isWinAt(b, i, AI) ? WIN + depth + 1 : -negamax(b, depth, -Infinity, Infinity, HUMAN, moves + 1);
+    b[i] = 0;
+    // Easy mode adds noise to positional judgement but still sees immediate wins.
+    if (difficulty === "easy" && Math.abs(s) < WIN / 2) s += (Math.random() * 2 - 1) * 10;
+    if (s > bestScore) { bestScore = s; best = [c]; }
+    else if (s === bestScore) best.push(c);
+  }
+  return best[Math.floor(Math.random() * best.length)];
+}
+
+// ---------- rendering & flow ----------
+function setStatus(html, over = false) {
+  statusEl.innerHTML = html;
+  statusEl.classList.toggle("over", over);
+}
+
+function showTurn() {
+  if (current === HUMAN) setStatus('<span class="chip p1"></span>Your turn');
+  else setStatus('<span class="chip p2"></span><span class="dots">Computer is thinking</span>');
+  boardEl.classList.toggle("locked", current !== HUMAN);
+  updateGhost();
+}
+
+function updateGhost() {
+  const show = hoverCol !== null && current === HUMAN && !busy && !gameOver && lowestRow(board, hoverCol) >= 0;
+  ghost.classList.toggle("show", show);
+  if (hoverCol !== null) ghost.style.gridColumn = hoverCol + 1;
+}
+
+function placeDisc(c, p, done) {
+  const r = lowestRow(board, c);
+  const i = r * COLS + c;
+  board[i] = p;
+  moves++;
+  discsEl.querySelectorAll(".last").forEach(el => el.classList.remove("last"));
+  const el = document.createElement("div");
+  el.className = `disc p${p} last`;
+  el.style.gridRow = r + 1;
+  el.style.gridColumn = c + 1;
+  el.style.setProperty("--r", r + 1);
+  const dur = 280 + r * 55;
+  el.style.animationDuration = dur + "ms";
+  discsEl.appendChild(el);
+  discEls[i] = el;
+  const id = gameId;
+  setTimeout(() => { if (id === gameId) done(i); }, dur);
+}
+
+// Returns true if the move ended the game.
+function afterMove(i, p) {
+  const line = winningCells(board, i, p);
+  if (line) { endGame(p, line); return true; }
+  if (moves === ROWS * COLS) { endGame(0); return true; }
+  return false;
+}
+
+function endGame(winner, line = []) {
+  gameOver = true;
+  boardEl.classList.add("locked");
+  updateGhost();
+  if (winner === HUMAN) { score.human++; setStatus('<span class="chip p1"></span>You win! 🎉', true); }
+  else if (winner === AI) { score.ai++; setStatus('<span class="chip p2"></span>The computer wins', true); }
+  else { score.draw++; setStatus("It's a draw", true); }
+  if (line.length) {
+    boardEl.classList.add("ended");
+    line.forEach(j => discEls[j].classList.add("win"));
+  }
+  saveScore();
+  renderScore();
+}
+
+function humanPlay(c) {
+  if (busy || gameOver || current !== HUMAN || lowestRow(board, c) < 0) return;
+  busy = true;
+  updateGhost();
+  placeDisc(c, HUMAN, i => {
+    busy = false;
+    if (afterMove(i, HUMAN)) return;
+    current = AI;
+    aiTurn();
+  });
+}
+
+function aiTurn() {
+  busy = true;
+  showTurn();
+  const id = gameId;
+  setTimeout(() => {
+    if (id !== gameId) return;
+    placeDisc(chooseMove(), AI, i => {
+      busy = false;
+      if (afterMove(i, AI)) return;
+      current = HUMAN;
+      showTurn();
+    });
+  }, 450);
+}
+
+function newGame() {
+  gameId++;
+  board = new Array(ROWS * COLS).fill(0);
+  discEls = new Array(ROWS * COLS).fill(null);
+  moves = 0;
+  gameOver = false;
+  busy = false;
+  discsEl.innerHTML = "";
+  boardEl.classList.remove("ended");
+  current = starter === "human" ? HUMAN : AI;
+  if (current === AI) aiTurn(); else showTurn();
+}
+
+// ---------- score persistence ----------
+function loadScore() {
+  try {
+    const s = JSON.parse(localStorage.getItem("c4-score"));
+    if (s) score = { human: s.human || 0, ai: s.ai || 0, draw: s.draw || 0 };
+  } catch (e) {}
+}
+function saveScore() {
+  try { localStorage.setItem("c4-score", JSON.stringify(score)); } catch (e) {}
+}
+function renderScore() {
+  $("sHuman").textContent = score.human;
+  $("sAI").textContent = score.ai;
+  $("sDraw").textContent = score.draw;
+}
+
+// ---------- setup ----------
+for (let i = 0; i < ROWS * COLS; i++) {
+  const h = document.createElement("div");
+  h.className = "hole";
+  $("frame").appendChild(h);
+}
+for (let c = 0; c < COLS; c++) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.setAttribute("aria-label", `Drop disc in column ${c + 1}`);
+  btn.addEventListener("click", () => humanPlay(c));
+  btn.addEventListener("pointerenter", () => { hoverCol = c; updateGhost(); });
+  btn.addEventListener("focus", () => { hoverCol = c; updateGhost(); });
+  $("cols").appendChild(btn);
+}
+$("cols").addEventListener("pointerleave", () => { hoverCol = null; updateGhost(); });
+
+function bindSeg(id, get, set) {
+  const seg = $(id);
+  const sync = () => seg.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === get()));
+  seg.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    set(b.dataset.v);
+    sync();
+  });
+  sync();
+}
+bindSeg("difficulty", () => difficulty, v => { difficulty = v; });
+bindSeg("starter", () => starter, v => {
+  starter = v;
+  // Switch immediately if nothing has been played yet; otherwise it applies to the next game.
+  if (moves === 0 || gameOver) newGame();
+});
+
+$("newGame").addEventListener("click", newGame);
+$("resetScore").addEventListener("click", () => { score = { human: 0, ai: 0, draw: 0 }; saveScore(); renderScore(); });
+
+document.addEventListener("keydown", e => {
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= COLS) humanPlay(n - 1);
+});
+
+loadScore();
+renderScore();
+newGame();
+</script>
+</body>
+</html>
