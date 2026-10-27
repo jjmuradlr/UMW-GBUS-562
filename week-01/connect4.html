@@ -42,6 +42,7 @@
   }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { margin: 0; }
   body {
     min-height: 100vh;
@@ -198,13 +199,20 @@
   </header>
 
   <section class="scores" aria-label="Score">
-    <div class="score"><span class="chip p1"></span><div><div class="label">You</div><div class="num" id="sHuman">0</div></div></div>
+    <div class="score"><span class="chip p1"></span><div><div class="label" id="lP1">You</div><div class="num" id="sP1">0</div></div></div>
     <div class="score"><span class="chip draw"></span><div><div class="label">Draws</div><div class="num" id="sDraw">0</div></div></div>
-    <div class="score"><span class="chip p2"></span><div><div class="label">Computer</div><div class="num" id="sAI">0</div></div></div>
+    <div class="score"><span class="chip p2"></span><div><div class="label" id="lP2">Computer</div><div class="num" id="sP2">0</div></div></div>
   </section>
 
   <section class="controls">
     <div class="group">
+      <span class="group-label">Mode</span>
+      <div class="seg" id="mode">
+        <button type="button" data-v="ai">vs Computer</button>
+        <button type="button" data-v="pvp">2 Players</button>
+      </div>
+    </div>
+    <div class="group ai-only">
       <span class="group-label">Difficulty</span>
       <div class="seg" id="difficulty">
         <button type="button" data-v="easy">Easy</button>
@@ -212,7 +220,7 @@
         <button type="button" data-v="hard">Hard</button>
       </div>
     </div>
-    <div class="group">
+    <div class="group ai-only">
       <span class="group-label">First move</span>
       <div class="seg" id="starter">
         <button type="button" data-v="human">You</button>
@@ -262,8 +270,11 @@ const $ = id => document.getElementById(id);
 const boardEl = $("board"), discsEl = $("discs"), ghost = $("ghost"), statusEl = $("status");
 
 let board, discEls, moves, current, gameOver, busy, gameId = 0, hoverCol = null;
-let difficulty = "medium", starter = "human";
-let score = { human: 0, ai: 0, draw: 0 };
+let mode = "ai", difficulty = "medium", starter = "human";
+let scores = { ai: { p1: 0, p2: 0, draw: 0 }, pvp: { p1: 0, p2: 0, draw: 0 } };
+const NAMES = { ai: { 1: "You", 2: "Computer" }, pvp: { 1: "Red", 2: "Gold" } };
+
+const isHumanTurn = () => mode === "pvp" || current === HUMAN;
 
 // ---------- game rules ----------
 function lowestRow(b, c) {
@@ -345,14 +356,16 @@ function setStatus(html, over = false) {
 }
 
 function showTurn() {
-  if (current === HUMAN) setStatus('<span class="chip p1"></span>Your turn');
+  if (mode === "pvp") setStatus(`<span class="chip p${current}"></span>${NAMES.pvp[current]}'s turn`);
+  else if (current === HUMAN) setStatus('<span class="chip p1"></span>Your turn');
   else setStatus('<span class="chip p2"></span><span class="dots">Computer is thinking</span>');
-  boardEl.classList.toggle("locked", current !== HUMAN);
+  boardEl.classList.toggle("locked", !isHumanTurn());
   updateGhost();
 }
 
 function updateGhost() {
-  const show = hoverCol !== null && current === HUMAN && !busy && !gameOver && lowestRow(board, hoverCol) >= 0;
+  const show = hoverCol !== null && isHumanTurn() && !busy && !gameOver && lowestRow(board, hoverCol) >= 0;
+  ghost.className = `disc p${current}`;
   ghost.classList.toggle("show", show);
   if (hoverCol !== null) ghost.style.gridColumn = hoverCol + 1;
 }
@@ -388,9 +401,12 @@ function endGame(winner, line = []) {
   gameOver = true;
   boardEl.classList.add("locked");
   updateGhost();
-  if (winner === HUMAN) { score.human++; setStatus('<span class="chip p1"></span>You win! 🎉', true); }
-  else if (winner === AI) { score.ai++; setStatus('<span class="chip p2"></span>The computer wins', true); }
-  else { score.draw++; setStatus("It's a draw", true); }
+  const score = scores[mode];
+  if (winner) score["p" + winner]++; else score.draw++;
+  if (!winner) setStatus("It's a draw", true);
+  else if (mode === "pvp") setStatus(`<span class="chip p${winner}"></span>${NAMES.pvp[winner]} wins! 🎉`, true);
+  else if (winner === HUMAN) setStatus('<span class="chip p1"></span>You win! 🎉', true);
+  else setStatus('<span class="chip p2"></span>The computer wins', true);
   if (line.length) {
     boardEl.classList.add("ended");
     line.forEach(j => discEls[j].classList.add("win"));
@@ -400,14 +416,15 @@ function endGame(winner, line = []) {
 }
 
 function humanPlay(c) {
-  if (busy || gameOver || current !== HUMAN || lowestRow(board, c) < 0) return;
+  if (busy || gameOver || !isHumanTurn() || lowestRow(board, c) < 0) return;
   busy = true;
   updateGhost();
-  placeDisc(c, HUMAN, i => {
+  const p = current;
+  placeDisc(c, p, i => {
     busy = false;
-    if (afterMove(i, HUMAN)) return;
-    current = AI;
-    aiTurn();
+    if (afterMove(i, p)) return;
+    current = 3 - p;
+    if (mode === "ai") aiTurn(); else showTurn();
   });
 }
 
@@ -435,23 +452,26 @@ function newGame() {
   busy = false;
   discsEl.innerHTML = "";
   boardEl.classList.remove("ended");
-  current = starter === "human" ? HUMAN : AI;
-  if (current === AI) aiTurn(); else showTurn();
+  current = mode === "pvp" || starter === "human" ? HUMAN : AI;
+  if (mode === "ai" && current === AI) aiTurn(); else showTurn();
 }
 
 // ---------- score persistence ----------
 function loadScore() {
   try {
-    const s = JSON.parse(localStorage.getItem("c4-score"));
-    if (s) score = { human: s.human || 0, ai: s.ai || 0, draw: s.draw || 0 };
+    const s = JSON.parse(localStorage.getItem("c4-scores"));
+    if (s) for (const m of ["ai", "pvp"]) Object.assign(scores[m], s[m]);
   } catch (e) {}
 }
 function saveScore() {
-  try { localStorage.setItem("c4-score", JSON.stringify(score)); } catch (e) {}
+  try { localStorage.setItem("c4-scores", JSON.stringify(scores)); } catch (e) {}
 }
 function renderScore() {
-  $("sHuman").textContent = score.human;
-  $("sAI").textContent = score.ai;
+  const score = scores[mode];
+  $("lP1").textContent = NAMES[mode][1];
+  $("lP2").textContent = NAMES[mode][2];
+  $("sP1").textContent = score.p1;
+  $("sP2").textContent = score.p2;
   $("sDraw").textContent = score.draw;
 }
 
@@ -483,6 +503,13 @@ function bindSeg(id, get, set) {
   });
   sync();
 }
+bindSeg("mode", () => mode, v => {
+  if (v === mode) return;
+  mode = v;
+  document.querySelectorAll(".ai-only").forEach(el => { el.hidden = mode !== "ai"; });
+  renderScore();
+  newGame();
+});
 bindSeg("difficulty", () => difficulty, v => { difficulty = v; });
 bindSeg("starter", () => starter, v => {
   starter = v;
@@ -491,7 +518,7 @@ bindSeg("starter", () => starter, v => {
 });
 
 $("newGame").addEventListener("click", newGame);
-$("resetScore").addEventListener("click", () => { score = { human: 0, ai: 0, draw: 0 }; saveScore(); renderScore(); });
+$("resetScore").addEventListener("click", () => { scores[mode] = { p1: 0, p2: 0, draw: 0 }; saveScore(); renderScore(); });
 
 document.addEventListener("keydown", e => {
   const n = parseInt(e.key, 10);
