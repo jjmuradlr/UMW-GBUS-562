@@ -1,0 +1,6 @@
+# Packages for week-03/ask.py. Install into the repo's .venv:
+#   .venv\Scripts\python.exe -m pip install -r week-03\requirements.txt
+anthropic==2.8.0        # Claude API
+chromadb==1.5.9         # vector database + built-in embedding model (all-MiniLM-L6-v2)
+beautifulsoup4==4.15.0  # HTML parsing
+pymupdf==2.1            # PDF text extraction with font sizes (to find headings)

@@ -218,3 +218,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Chroma vector databases (rebuilt locally by week-03/ask.py)
+chroma_db/
