@@ -1,0 +1,53 @@
+Sender:  logan.brooks@ridgelinehotels.example
+Subject: Days off
+Email:   week-04\ridgeline-hotels\sample-emails\07-logan-seasonal.eml
+Org:     ridgeline-hotels
+Model:   claude-sonnet-5
+
+Tools offered: search_policy, get_leave_balance, save_reply
+
+Step 1: get_leave_balance
+    input: {}
+    error result: Error executing tool get_leave_balance: No employee record found for this address (logan.brooks@ridgelinehotels.example). Do NOT state, estimate, or guess any leave balance for this person. Say that their balance couldn't be found and that someone from HR will check it.
+
+Step 2: search_policy
+    input: {"query": "PTO accrual for new hires"}
+    result: Top 4 policy passages for: PTO accrual for new hires
+
+--- Result 1 | source: pto-policy.html | similarity 0.569
+Document note: Effective this year. Owner: People and Culture.
+Paid Time Off (PTO) Policy > Carrying PTO into next year
+
+You can carry up to 3 unused PTO days into the next calendar year. ...
+
+Step 3: save_reply
+    input: {"reply_text": "Hi Logan,\n\nThanks for reaching out! Unfortunately, I wasn't able to find your employee record in our system to pull up your specific PTO balance, so I don't want to guess at a number. Someone from People and Culture will look into this and follow up with your exact balance.\n\nIn the meantime, here's some general context from our PTO policy (source: pto-policy.html):\n- Full-time team members earn 12 PTO days a year in their first three years (credited monthly), and 18 days a year after that.\n- Part-time team members earn PTO in proportion to their scheduled hours.\n- Seasonal team members don't earn PTO.\n\nSince you mentioned you started in May as a pool attendant, whether you're accruing PTO — and how much — will depend on whether your role is classified as full-time, part-time, or seasonal. People and Culture can confirm this along with your current balance.\n\nThanks for your patience,\nHR Assistant", "needs_human_review": true}
+    result: Draft saved to drafts/20261116-221121_ridgeline-hotels_07-logan-seasonal.txt. It has not been sent.
+
+Claude's final message:
+I've saved a draft reply to Logan. Since his employee record couldn't be found in our system, I was unable to pull his actual PTO balance — I flagged this for human review so someone from People and Culture can verify his record and provide the exact number. I included general PTO accrual policy context (from pto-policy.html) in the meantime, noting that his balance depends on whether his role is classified as full-time, part-time, or seasonal.
+
+Stop reason: Claude finished its reply without requesting another tool.
+Tool calls:  3
+
+Saved to week-04\drafts\20261116-221121_ridgeline-hotels_07-logan-seasonal.txt (not sent)
+To: logan.brooks@ridgelinehotels.example
+Subject: Re: Days off
+
+DRAFT
+Hi Logan,
+
+Thanks for reaching out! Unfortunately, I wasn't able to find your employee record in our system to pull up your specific PTO balance, so I don't want to guess at a number. Someone from People and Culture will look into this and follow up with your exact balance.
+
+In the meantime, here's some general context from our PTO policy (source: pto-policy.html):
+- Full-time team members earn 12 PTO days a year in their first three years (credited monthly), and 18 days a year after that.
+- Part-time team members earn PTO in proportion to their scheduled hours.
+- Seasonal team members don't earn PTO.
+
+Since you mentioned you started in May as a pool attendant, whether you're accruing PTO — and how much — will depend on whether your role is classified as full-time, part-time, or seasonal. People and Culture can confirm this along with your current balance.
+
+Thanks for your patience,
+HR Assistant
+Needs human review: true
+
+Tokens: 7,680 input, 694 output

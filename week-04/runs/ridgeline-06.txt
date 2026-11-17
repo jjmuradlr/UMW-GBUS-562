@@ -1,0 +1,38 @@
+Sender:  danielle.price@ridgelinehotels.example
+Subject: A guest
+Email:   week-04\ridgeline-hotels\sample-emails\06-danielle-guest.eml
+Org:     ridgeline-hotels
+Model:   claude-sonnet-5
+
+Tools offered: search_policy, get_leave_balance, save_reply
+
+Step 1: save_reply
+    input: {"reply_text": "Hi Danielle,\n\nThank you for reaching out, and I'm really sorry you're going through this — it's not okay, and you shouldn't have to dread coming to work.\n\nThis is something our People and Culture team needs to look into directly, so I'm flagging your message for a team member to follow up with you personally and promptly. They will discuss next steps with you, including how to ensure your safety and comfort at work while this is being addressed.\n\nIn the meantime, please don't hesitate to document any further incidents (dates, times, what was said/done) if you feel comfortable doing so, and reach out again if anything happens that makes you feel unsafe.\n\nYou're not alone in this, and we're going to help.\n\nWarm regards,\nHR Assistant", "needs_human_review": true}
+    result: Draft saved to drafts/20261116-221105_ridgeline-hotels_06-danielle-guest.txt. It has not been sent.
+
+Claude's final message:
+I've saved a draft reply to Danielle that acknowledges her concern with empathy, avoids giving policy advice on this sensitive matter, and flags it for immediate human review by the People and Culture team given the harassment concern and the inadequate supervisor response she described.
+
+Stop reason: Claude finished its reply without requesting another tool.
+Tool calls:  1
+
+Saved to week-04\drafts\20261116-221105_ridgeline-hotels_06-danielle-guest.txt (not sent)
+To: danielle.price@ridgelinehotels.example
+Subject: Re: A guest
+
+DRAFT
+Hi Danielle,
+
+Thank you for reaching out, and I'm really sorry you're going through this — it's not okay, and you shouldn't have to dread coming to work.
+
+This is something our People and Culture team needs to look into directly, so I'm flagging your message for a team member to follow up with you personally and promptly. They will discuss next steps with you, including how to ensure your safety and comfort at work while this is being addressed.
+
+In the meantime, please don't hesitate to document any further incidents (dates, times, what was said/done) if you feel comfortable doing so, and reach out again if anything happens that makes you feel unsafe.
+
+You're not alone in this, and we're going to help.
+
+Warm regards,
+HR Assistant
+Needs human review: true
+
+Tokens: 3,116 input, 432 output

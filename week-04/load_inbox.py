@@ -38,7 +38,7 @@ PASS_KEYS = {"password", "pass", "app_password", "apppassword", "app password"}
 def load_login():
     """Return (address, password) from the login file without echoing either."""
     if not LOGIN_FILE.exists():
-        sys.exit(f"Login file not found: {LOGIN_FILE}")
+        sys.exit(f"Login file not found: ..\\{LOGIN_FILE.name} (it goes in the folder above the repository)")
     lines = [ln.strip() for ln in LOGIN_FILE.read_text(encoding="utf-8-sig").splitlines()]
     lines = [ln for ln in lines if ln and not ln.startswith("#")]
 
@@ -80,7 +80,7 @@ def prepare(path):
 def main():
     files = sorted(EMAIL_DIR.glob("*.eml"))
     if not files:
-        sys.exit(f"No .eml files found in {EMAIL_DIR}")
+        sys.exit(f"No .eml files found in {EMAIL_DIR.relative_to(REPO_ROOT)}")
 
     user, password = load_login()
     try:

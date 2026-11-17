@@ -1,0 +1,70 @@
+Sender:  brittany.cole@ridgelinehotels.example
+Subject: Honeymoon
+Email:   week-04\ridgeline-hotels\sample-emails\03-brittany-honeymoon.eml
+Org:     ridgeline-hotels
+Model:   claude-sonnet-5
+
+Tools offered: search_policy, get_leave_balance, save_reply
+
+Step 1: get_leave_balance
+    input: {}
+    result: Leave balance for Brittany Cole (brittany.cole@ridgelinehotels.example):
+- PTO Days Remaining: 4
+- Sick Days Remaining: 3
+Source: employees.csv
+
+Step 2: search_policy
+    input: {"query": "requesting consecutive PTO days, insufficient PTO balance options"}
+    result: Top 4 policy passages for: requesting consecutive PTO days, insufficient PTO balance options
+
+--- Result 1 | source: pto-policy.html | similarity 0.637
+Document note: Effective this year. Owner: People and Culture.
+Paid Time Off (PTO) Policy > Carrying PTO into next year
+
+You can carry up to 3 unuse...
+
+Step 3: save_reply
+    input: {"reply_text": "Hi Brittany,\n\nCongratulations on your upcoming wedding! 🎉\n\nHere's where things stand:\n\n- Your current PTO balance is 4 days remaining (per our records).\n- Since you're hoping to take 6 consecutive days, you're short by 2 days.\n\nThe good news is you have options under our PTO Policy (pto-policy.html):\n\n1. **Borrowing PTO**: You can borrow up to 3 PTO days from what you'll earn in the next six months. Since your honeymoon is about two months out, you have enough lead time to request this — it needs your general manager's approval and must be submitted at least 30 days in advance.\n2. **Approval timeline**: Because you're requesting 5 or more consecutive days, your supervisor's approval is required at least 30 days ahead of the start date, so it's a good idea to submit your request soon.\n3. **Blackout dates**: If any of your requested dates fall on your hotel's blackout dates, you'd also need your general manager's sign-off.\n\nI'd recommend submitting your PTO request through the scheduling system as soon as possible, noting that you'd like to borrow 2 days to cover the shortfall, so there's plenty of time for approvals.\n\nCongratulations again, and let us know if you have any other questions!\n\nBest,\nHR Team\n", "needs_human_review": false}
+    result: Draft saved to drafts/20261116-221025_ridgeline-hotels_03-brittany-honeymoon.txt. It has not been sent.
+
+Claude's final message:
+I've drafted a reply to Brittany letting her know she currently has 4 PTO days remaining (she needs 6 consecutive days), and outlined her options per the PTO Policy (pto-policy.html):
+
+- **Borrowing PTO**: She can borrow up to 3 days against future accrual, with GM approval, as long as it's requested 30+ days ahead — which fits her ~2-month timeline.
+- **Approval timeline**: Requests of 5+ consecutive days need supervisor approval at least 30 days in advance.
+- **Blackout dates**: Flagged that GM approval would also be needed if any requested dates fall on a blackout date.
+
+The draft has been saved for review (no sensitive/legal issues here, so it wasn't flagged for mandatory human review, though the P&C team can still check it before sending).
+
+Stop reason: Claude finished its reply without requesting another tool.
+Tool calls:  3
+
+Saved to week-04\drafts\20261116-221025_ridgeline-hotels_03-brittany-honeymoon.txt (not sent)
+To: brittany.cole@ridgelinehotels.example
+Subject: Re: Honeymoon
+
+DRAFT
+Hi Brittany,
+
+Congratulations on your upcoming wedding! 🎉
+
+Here's where things stand:
+
+- Your current PTO balance is 4 days remaining (per our records).
+- Since you're hoping to take 6 consecutive days, you're short by 2 days.
+
+The good news is you have options under our PTO Policy (pto-policy.html):
+
+1. **Borrowing PTO**: You can borrow up to 3 PTO days from what you'll earn in the next six months. Since your honeymoon is about two months out, you have enough lead time to request this — it needs your general manager's approval and must be submitted at least 30 days in advance.
+2. **Approval timeline**: Because you're requesting 5 or more consecutive days, your supervisor's approval is required at least 30 days ahead of the start date, so it's a good idea to submit your request soon.
+3. **Blackout dates**: If any of your requested dates fall on your hotel's blackout dates, you'd also need your general manager's sign-off.
+
+I'd recommend submitting your PTO request through the scheduling system as soon as possible, noting that you'd like to borrow 2 days to cover the shortfall, so there's plenty of time for approvals.
+
+Congratulations again, and let us know if you have any other questions!
+
+Best,
+HR Team
+Needs human review: false
+
+Tokens: 6,553 input, 1,050 output
