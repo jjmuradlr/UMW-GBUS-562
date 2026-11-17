@@ -13,3 +13,5 @@ This repository contains materials created for GBUS 562: AI Language Models at t
    - [Prompt Lab](week-02/prompt-lab.html): a single-file web app for testing prompts against Claude, built with Claude Code.
 3. [week-03](week-03/)
    - Week 3: a RAG tool that answers questions from a folder of documents (Copperline Manufacturing's finance documents by default, or Larkfield Credit Union's member documents with `--docs week-03/larkfield-docs`), built with Claude Code.
+4. [week-04](week-04/)
+   - Week 4: an AI agent that prepares replies to HR emails using tools from an MCP server, built with Claude Code. It can handle one email file, or (`--inbox`) every unread email in a Gmail sandbox, saving each reply as a Gmail draft in the same thread. It never sends email. `load_inbox.py` fills the sandbox inbox with the sample emails.

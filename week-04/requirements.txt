@@ -1,0 +1,6 @@
+# Packages for week-04 (hr_mcp_server.py and agent.py). Install into the repo's .venv:
+#   .venv\Scripts\python.exe -m pip install -r week-04\requirements.txt
+mcp==2.3.0              # official Model Context Protocol Python SDK (server + client)
+chromadb==1.5.9         # vector database + built-in embedding model (all-MiniLM-L6-v2)
+beautifulsoup4==4.15.0  # HTML parsing for the HR policy documents
+anthropic==2.8.0        # Anthropic Python SDK (Claude tool use in agent.py)
