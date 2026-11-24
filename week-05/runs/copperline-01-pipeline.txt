@@ -1,0 +1,489 @@
+Email:   week-05\copperline-coffee\supplier-emails\01-danforth-pump-delay.eml
+Company: week-05\copperline-coffee (drafts go to week-05\drafts\copperline-coffee)
+Columns worked out from each header row:
+  parts.csv: part id=part_id, supplier=supplier, on hand=on_hand, description=description
+  inbound.csv: po number=po_number, part id=part_id, supplier=supplier, arrives in days=arrives_in_days, qty=qty
+  bill-of-materials.csv: part id=part_id, parts per unit=per_unit, product=product
+  orders.csv: order id=order_id, contact email=contact_email, customer=customer, late penalty=late_penalty, ship day=ship_by_day, product=product, quantity=units
+  suppliers.csv: contact email=contact_email, contact name=contact_name, supplier=supplier
+Model:   claude-sonnet-5
+
+======================================================================
+Step 1: supply analyst
+======================================================================
+
+==> HANDOFF  coordinator -> analyst: supplier email
+    From: Diane Kessler <d.kessler@danforthpump.example>
+    Subject: PO-5512 - PU-20 pumps - partial shipment
+    
+    Hello,
+    
+    I'm writing about PO-5512 for 200 PU-20 vibration pumps. A test rig on our
+    assembly line failed inspection, and we can't release the full order on the
+    scheduled date.
+    
+    We can deliver 40 of the 200 pumps on the scheduled date. The other 160 will
+    follow 15 days later.
+    
+    We're sorry for the disruption. To help us plan, could you send us a list of
+    the customer orders these pumps are for, with each customer's name and
+    quantity? We'll do our best to keep the delay as short as we can.
+    
+    Diane Kessler
+    Key Accounts, Danforth Pump Works
+    [tokens] analyst: 3,469 in, 81 out (so far: 3,469 in, 81 out over 1 call(s))
+
+==> HANDOFF  analyst -> supply server (get_part): tool call 1
+    {
+     "part_id": "PU-20"
+    }
+
+==> HANDOFF  get_part -> analyst: result
+    {
+     "part_id": "PU-20",
+     "description": "Vibration pump",
+     "supplier": "Danforth Pump Works",
+     "on_hand": 50,
+     "scheduled_shipments": [
+      {
+       "po_number": "PO-5512",
+       "supplier": "Danforth Pump Works",
+       "qty": 200,
+       "arrives_in_days": 4
+      }
+     ],
+     "used_in": [
+      {
+       "product": "Cafe One",
+       "parts_per_unit": 1
+      },
+      {
+       "product": "Cafe Duo",
+       "parts_per_unit": 2
+      }
+     ]
+    }
+    [tokens] analyst: 3,766 in, 241 out (so far: 7,235 in, 322 out over 2 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 2
+    {
+     "base_day": 4,
+     "base_label": "the scheduled date of PO-5512",
+     "add_days": 0,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": "Friday"
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026); next Friday after that = day 11 (Fri 04 Dec 2026)
+    [tokens] analyst: 4,069 in, 237 out (so far: 11,304 in, 559 out over 3 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 3
+    {
+     "base_day": 4,
+     "base_label": "the scheduled date of PO-5512",
+     "add_days": 0,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": "Thursday"
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026); next Thursday after that = day 10 (Thu 03 Dec 2026)
+    [tokens] analyst: 4,369 in, 218 out (so far: 15,673 in, 777 out over 4 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 4
+    {
+     "base_day": 4,
+     "base_label": "the scheduled date of PO-5512",
+     "add_days": 0,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": ""
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026)
+    [tokens] analyst: 4,624 in, 181 out (so far: 20,297 in, 958 out over 5 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 5
+    {
+     "base_day": 4,
+     "base_label": "the scheduled date of PO-5512",
+     "add_days": 15,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": ""
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026); + 15 days = day 19 (Sat 12 Dec 2026)
+    [tokens] analyst: 4,866 in, 456 out (so far: 25,163 in, 1,414 out over 6 call(s))
+
+==> HANDOFF  analyst -> code (checks the reading, works out orders at risk): submit_brief (attempt 1)
+    {
+     "part_id": "PU-20",
+     "po_number": "PO-5512",
+     "schedule_changed": true,
+     "schedule_quote": "We can deliver 40 of the 200 pumps on the scheduled date. The other 160 will follow 15 days later.",
+     "new_schedule": [
+      {
+       "qty": 40,
+       "day": 4,
+       "conversion": "the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026)"
+      },
+      {
+       "qty": 160,
+       "day": 19,
+       "conversion": "the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026); + 15 days = day 19 (Sat 12 Dec 2026)"
+      }
+     ],
+     "options": [],
+     "supplier_questions": [
+      "Could you send us a list of the customer orders these pumps are for, with each customer's name and quantity?"
+     ],
+     "decisions_for_a_person": []
+    }
+
+==> HANDOFF  code -> analyst: result
+    Accepted.
+    (analyst used 5 of 10 tool calls, and submitted its brief 1 time(s))
+
+==> HANDOFF  analyst + code -> coordinator: brief (JSON, in full)
+    {
+     "part_id": "PU-20",
+     "po_number": "PO-5512",
+     "email_date": "The email has no usable Date header, so its date is taken as today, Mon 23 Nov 2026 (day 0).",
+     "what_changed": "The supplier wrote: \"We can deliver 40 of the 200 pumps on the scheduled date. The other 160 will follow 15 days later.\" Resulting ship days: 40 units arrive on day 4 (the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026)); 160 units arrive on day 19 (the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026); + 15 days = day 19 (Sat 12 Dec 2026)).",
+     "schedule_quote": "We can deliver 40 of the 200 pumps on the scheduled date. The other 160 will follow 15 days later.",
+     "new_schedule": [
+      {
+       "qty": 40,
+       "day": 4,
+       "conversion": "the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026)"
+      },
+      {
+       "qty": 160,
+       "day": 19,
+       "conversion": "the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026); + 15 days = day 19 (Sat 12 Dec 2026)"
+      }
+     ],
+     "orders_at_risk": [
+      {
+       "order_id": "O-2203",
+       "customer": "Elm State University Dining",
+       "product": "Cafe One",
+       "quantity": 50,
+       "units_short": 10,
+       "ship_day": 12,
+       "ready_day": 19,
+       "days_late": 7,
+       "late_penalty": true
+      },
+      {
+       "order_id": "O-2204",
+       "customer": "Kettle & Crumb Bakery",
+       "product": "Cafe Duo",
+       "quantity": 10,
+       "units_short": 20,
+       "ship_day": 15,
+       "ready_day": 19,
+       "days_late": 4,
+       "late_penalty": false
+      },
+      {
+       "order_id": "O-2205",
+       "customer": "Tall Pines Coffee House",
+       "product": "Cafe One",
+       "quantity": 25,
+       "units_short": 25,
+       "ship_day": 17,
+       "ready_day": 19,
+       "days_late": 2,
+       "late_penalty": true
+      }
+     ],
+     "options": [],
+     "decisions_for_a_person": [],
+     "supplier_questions": [
+      "Could you send us a list of the customer orders these pumps are for, with each customer's name and quantity?"
+     ],
+     "worked_out_by": "Orders at risk and days late were calculated in code from the parts, bill of materials, inbound orders, customer orders, and the new ship days."
+    }
+
+======================================================================
+Step 2: customer notices (3 order(s) at risk)
+======================================================================
+
+==> HANDOFF  coordinator -> customer writer: facts of order O-2203
+    {
+     "order_id": "O-2203",
+     "customer": "Elm State University Dining",
+     "product": "Cafe One",
+     "quantity": 50,
+     "planned_ship_day": 12,
+     "expected_ship_day": 19,
+     "days_later_than_planned": 7,
+     "days_are": "counted from today (day 0 = today)"
+    }
+    [tokens] customer writer: 370 in, 160 out (so far: 370 in, 160 out over 1 call(s))
+
+==> HANDOFF  customer writer -> coordinator: draft
+    Subject: Update on Your Order O-2203
+    
+    Dear Elm State University Dining,
+    
+    We're writing to update you on order O-2203 for 50 Cafe One units. This order is now expected to ship 7 days later than originally planned.
+    
+    We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+    
+    We will keep you informed if there are any further updates to your shipping timeline. Thank you for your patience and understanding.
+    
+    Customer Service, Copperline Coffee Machines
+
+==> HANDOFF  code check -> coordinator: passed (no names, IDs, contract terms, or option choice)
+
+==> HANDOFF  coordinator -> reviewer: the draft to the customer (shown above) + its facts
+    [tokens] reviewer: 622 in, 286 out (so far: 622 in, 286 out over 1 call(s))
+
+==> HANDOFF  reviewer -> coordinator: APPROVE
+
+    Saved week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-customer-O-2203.txt  [NEEDS A PERSON]: its order has a late penalty
+
+==> HANDOFF  review step -> coordinator: customer draft saved (NEEDS A PERSON)
+
+FINAL DRAFT TO CUSTOMER O-2203
+Subject: Update on Your Order O-2203
+
+Dear Elm State University Dining,
+
+We're writing to update you on order O-2203 for 50 Cafe One units. This order is now expected to ship 7 days later than originally planned.
+
+We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+
+We will keep you informed if there are any further updates to your shipping timeline. Thank you for your patience and understanding.
+
+Customer Service, Copperline Coffee Machines
+Marked for a person: yes
+
+==> HANDOFF  coordinator -> customer writer: facts of order O-2204
+    {
+     "order_id": "O-2204",
+     "customer": "Kettle & Crumb Bakery",
+     "product": "Cafe Duo",
+     "quantity": 10,
+     "planned_ship_day": 15,
+     "expected_ship_day": 19,
+     "days_later_than_planned": 4,
+     "days_are": "counted from today (day 0 = today)"
+    }
+    [tokens] customer writer: 377 in, 183 out (so far: 747 in, 343 out over 2 call(s))
+
+==> HANDOFF  customer writer -> coordinator: draft
+    Subject: Update on Your Order O-2204
+    
+    Dear Kettle & Crumb Bakery,
+    
+    We're writing to update you on order O-2204 for 10 Cafe Duo units. This order is now expected to ship 4 days later than originally planned.
+    
+    We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+    
+    We appreciate your patience and will keep you informed of any further updates regarding your order.
+    
+    Thank you for your understanding.
+    
+    Customer Service, Copperline Coffee Machines
+
+==> HANDOFF  code check -> coordinator: passed (no names, IDs, contract terms, or option choice)
+
+==> HANDOFF  coordinator -> reviewer: the draft to the customer (shown above) + its facts
+    [tokens] reviewer: 637 in, 7 out (so far: 1,259 in, 293 out over 2 call(s))
+
+==> HANDOFF  reviewer -> coordinator: APPROVE
+
+    Saved week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-customer-O-2204.txt  [ok]
+
+==> HANDOFF  review step -> coordinator: customer draft saved (ok)
+
+FINAL DRAFT TO CUSTOMER O-2204
+Subject: Update on Your Order O-2204
+
+Dear Kettle & Crumb Bakery,
+
+We're writing to update you on order O-2204 for 10 Cafe Duo units. This order is now expected to ship 4 days later than originally planned.
+
+We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+
+We appreciate your patience and will keep you informed of any further updates regarding your order.
+
+Thank you for your understanding.
+
+Customer Service, Copperline Coffee Machines
+Marked for a person: no
+
+==> HANDOFF  coordinator -> customer writer: facts of order O-2205
+    {
+     "order_id": "O-2205",
+     "customer": "Tall Pines Coffee House",
+     "product": "Cafe One",
+     "quantity": 25,
+     "planned_ship_day": 17,
+     "expected_ship_day": 19,
+     "days_later_than_planned": 2,
+     "days_are": "counted from today (day 0 = today)"
+    }
+    [tokens] customer writer: 373 in, 146 out (so far: 1,120 in, 489 out over 3 call(s))
+
+==> HANDOFF  customer writer -> coordinator: draft
+    Subject: Update on Your Order O-2205
+    
+    Dear Tall Pines Coffee House,
+    
+    We're writing about your order O-2205 for 25 Cafe One units. This order is now expected to ship 2 days later than originally planned.
+    
+    We apologize for the delay. It is due to a delay in a part from one of our suppliers.
+    
+    We appreciate your patience and will keep you informed of any further updates.
+    
+    Customer Service, Copperline Coffee Machines
+
+==> HANDOFF  code check -> coordinator: passed (no names, IDs, contract terms, or option choice)
+
+==> HANDOFF  coordinator -> reviewer: the draft to the customer (shown above) + its facts
+    [tokens] reviewer: 611 in, 197 out (so far: 1,870 in, 490 out over 3 call(s))
+
+==> HANDOFF  reviewer -> coordinator: APPROVE
+
+    Saved week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-customer-O-2205.txt  [NEEDS A PERSON]: its order has a late penalty
+
+==> HANDOFF  review step -> coordinator: customer draft saved (NEEDS A PERSON)
+
+FINAL DRAFT TO CUSTOMER O-2205
+Subject: Update on Your Order O-2205
+
+Dear Tall Pines Coffee House,
+
+We're writing about your order O-2205 for 25 Cafe One units. This order is now expected to ship 2 days later than originally planned.
+
+We apologize for the delay. It is due to a delay in a part from one of our suppliers.
+
+We appreciate your patience and will keep you informed of any further updates.
+
+Customer Service, Copperline Coffee Machines
+Marked for a person: yes
+
+======================================================================
+Step 3: reply to the supplier
+======================================================================
+
+==> HANDOFF  coordinator -> supplier writer: facts with no customer names, order IDs, or contract terms
+    {
+     "email": "From: Diane Kessler <d.kessler@danforthpump.example>\nSubject: PO-5512 - PU-20 pumps - partial shipment\n\nHello,\n\nI'm writing about PO-5512 for 200 PU-20 vibration pumps. A test rig on our\nassembly line failed inspection, and we can't release the full order on the\nscheduled date.\n\nWe can deliver 40 of the 200 pumps on the scheduled date. The other 160 will\nfollow 15 days later.\n\nWe're sorry for the disruption. To help us plan, could you send us a list of\nthe customer orders these pumps are for, with each customer's name and\nquantity? We'll do our best to keep the delay as short as we can.\n\nDiane Kessler\nKey Accounts, Danforth Pump Works",
+     "part_id": "PU-20",
+     "po_number": "PO-5512",
+     "what_changed": "The supplier wrote: \"We can deliver 40 of the 200 pumps on the scheduled date. The other 160 will follow 15 days later.\" Resulting ship days: 40 units arrive on day 4 (the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026)); 160 units arrive on day 19 (the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026); + 15 days = day 19 (Sat 12 Dec 2026)).",
+     "new_schedule": [
+      {
+       "qty": 40,
+       "day": 4,
+       "conversion": "the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026)"
+      },
+      {
+       "qty": 160,
+       "day": 19,
+       "conversion": "the scheduled date of PO-5512 = day 4 (Fri 27 Nov 2026); + 15 days = day 19 (Sat 12 Dec 2026)"
+      }
+     ],
+     "our_needs": {
+      "units_short_in_total": 55,
+      "needs": [
+       {
+        "needed_by_day": 12,
+        "more_units_needed": 10,
+        "
+    ... (703 more characters)
+    [tokens] supplier writer: 1,415 in, 387 out (so far: 1,415 in, 387 out over 1 call(s))
+
+==> HANDOFF  supplier writer -> coordinator: draft
+    Subject: RE: PO-5512 - PU-20 pumps - partial shipment
+    
+    Hello Diane,
+    
+    Thank you for the update. To confirm our understanding: of the 200 PU-20 pumps on PO-5512, 40 units will arrive on day 4 (Fri 27 Nov 2026) as scheduled, with the remaining 160 units following on day 19 (Sat 12 Dec 2026).
+    
+    This revised schedule leaves us short by a total of 55 units against our needs, as follows:
+    - 10 additional units needed by day 12
+    - 20 additional units (30 total) needed by day 15
+    - 25 additional units (55 total) needed by day 17
+    
+    Based on the new delivery dates, this results in delays ranging from 2 to 7 days against our requirements.
+    
+    Regarding your question about customer orders: we're not able to share customer names or order details. What we can tell you is the units-needed-by-date breakdown above — any way you could ship additional quantity sooner against those dates would directly reduce our delay.
+    
+    Please let us know if there's any way to expedite even a portion of the 160 units ahead of day 19.
+    
+    Best regards,
+    
+    Purchasing, Copperline Coffee Machines
+
+==> HANDOFF  code check -> coordinator: passed (no names, IDs, contract terms, or option choice)
+
+==> HANDOFF  coordinator -> reviewer: the draft to the supplier (shown above) + its facts
+    [tokens] reviewer: 1,742 in, 192 out (so far: 3,612 in, 682 out over 4 call(s))
+
+==> HANDOFF  reviewer -> coordinator: APPROVE
+
+    Saved week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-supplier-reply.txt  [NEEDS A PERSON]: an order it affects has a late penalty
+
+==> HANDOFF  review step -> coordinator: supplier draft saved (NEEDS A PERSON)
+
+FINAL DRAFT TO SUPPLIER
+Subject: RE: PO-5512 - PU-20 pumps - partial shipment
+
+Hello Diane,
+
+Thank you for the update. To confirm our understanding: of the 200 PU-20 pumps on PO-5512, 40 units will arrive on day 4 (Fri 27 Nov 2026) as scheduled, with the remaining 160 units following on day 19 (Sat 12 Dec 2026).
+
+This revised schedule leaves us short by a total of 55 units against our needs, as follows:
+- 10 additional units needed by day 12
+- 20 additional units (30 total) needed by day 15
+- 25 additional units (55 total) needed by day 17
+
+Based on the new delivery dates, this results in delays ranging from 2 to 7 days against our requirements.
+
+Regarding your question about customer orders: we're not able to share customer names or order details. What we can tell you is the units-needed-by-date breakdown above — any way you could ship additional quantity sooner against those dates would directly reduce our delay.
+
+Please let us know if there's any way to expedite even a portion of the 160 units ahead of day 19.
+
+Best regards,
+
+Purchasing, Copperline Coffee Machines
+Marked for a person: yes
+
+======================================================================
+Summary
+======================================================================
+Email: 01-danforth-pump-delay.eml
+
+Drafts saved: 4
+  customer week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-customer-O-2203.txt  (reviewer: APPROVE, 0 revision(s))
+  customer week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-customer-O-2204.txt  (reviewer: APPROVE, 0 revision(s))
+  customer week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-customer-O-2205.txt  (reviewer: APPROVE, 0 revision(s))
+  supplier week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-supplier-reply.txt  (reviewer: APPROVE, 0 revision(s))
+
+Drafts marked for a person: 3
+  week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-customer-O-2203.txt: its order has a late penalty
+  week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-customer-O-2205.txt: its order has a late penalty
+  week-05\drafts\copperline-coffee\01-danforth-pump-delay-pipeline-supplier-reply.txt: an order it affects has a late penalty
+
+Decisions for a person: 0
+
+Tokens used, by specialist:
+  analyst            6 call(s)     25,163 in    1,414 out
+  customer writer    3 call(s)      1,120 in      489 out
+  reviewer           4 call(s)      3,612 in      682 out
+  supplier writer    1 call(s)      1,415 in      387 out
+  total             14 call(s)     31,310 in    2,972 out
+
+Saved this output to week-05\runs\copperline-01-pipeline.txt

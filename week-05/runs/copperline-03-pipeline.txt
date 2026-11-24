@@ -1,0 +1,245 @@
+Email:   week-05\copperline-coffee\supplier-emails\03-ashgrove-burr-delay.eml
+Company: week-05\copperline-coffee (drafts go to week-05\drafts\copperline-coffee)
+Columns worked out from each header row:
+  parts.csv: part id=part_id, supplier=supplier, on hand=on_hand, description=description
+  inbound.csv: po number=po_number, part id=part_id, supplier=supplier, arrives in days=arrives_in_days, qty=qty
+  bill-of-materials.csv: part id=part_id, parts per unit=per_unit, product=product
+  orders.csv: order id=order_id, contact email=contact_email, customer=customer, late penalty=late_penalty, ship day=ship_by_day, product=product, quantity=units
+  suppliers.csv: contact email=contact_email, contact name=contact_name, supplier=supplier
+Model:   claude-sonnet-5
+
+======================================================================
+Step 1: supply analyst
+======================================================================
+
+==> HANDOFF  coordinator -> analyst: supplier email
+    From: Priya Raman <p.raman@ashgroveprecision.example>
+    Subject: PO-5531 - BR-64 burr sets - arriving 3 days late
+    
+    Hello,
+    
+    A heat-treatment furnace at our plant needed an unplanned repair, so PO-5531
+    for 120 BR-64 burr sets will arrive 3 days after the scheduled date. The full
+    quantity will ship together.
+    
+    Please let me know if this causes any problems on your side.
+    
+    Best,
+    Priya Raman
+    Order Management, Ashgrove Precision
+    [tokens] analyst: 3,393 in, 80 out (so far: 3,393 in, 80 out over 1 call(s))
+
+==> HANDOFF  analyst -> supply server (get_part): tool call 1
+    {
+     "part_id": "BR-64"
+    }
+
+==> HANDOFF  get_part -> analyst: result
+    {
+     "part_id": "BR-64",
+     "description": "64 mm burr set",
+     "supplier": "Ashgrove Precision",
+     "on_hand": 70,
+     "scheduled_shipments": [
+      {
+       "po_number": "PO-5531",
+       "supplier": "Ashgrove Precision",
+       "qty": 120,
+       "arrives_in_days": 10
+      }
+     ],
+     "used_in": [
+      {
+       "product": "Grinder 64",
+       "parts_per_unit": 1
+      }
+     ]
+    }
+    [tokens] analyst: 3,658 in, 186 out (so far: 7,051 in, 266 out over 2 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 2
+    {
+     "base_day": 10,
+     "base_label": "the scheduled date of PO-5531",
+     "add_days": 3,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": "Thursday"
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5531 = day 10 (Thu 03 Dec 2026); + 3 days = day 13 (Sun 06 Dec 2026); next Thursday after that = day 17 (Thu 10 Dec 2026)
+    [tokens] analyst: 3,930 in, 245 out (so far: 10,981 in, 511 out over 3 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 3
+    {
+     "base_day": 10,
+     "base_label": "the scheduled date of PO-5531",
+     "add_days": 3,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": "Thursday"
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5531 = day 10 (Thu 03 Dec 2026); + 3 days = day 13 (Sun 06 Dec 2026); next Thursday after that = day 17 (Thu 10 Dec 2026)
+    [tokens] analyst: 4,262 in, 240 out (so far: 15,243 in, 751 out over 4 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 4
+    {
+     "base_day": 10,
+     "base_label": "the scheduled date of PO-5531",
+     "add_days": 3,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": ""
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5531 = day 10 (Thu 03 Dec 2026); + 3 days = day 13 (Sun 06 Dec 2026)
+    [tokens] analyst: 4,563 in, 394 out (so far: 19,806 in, 1,145 out over 5 call(s))
+
+==> HANDOFF  analyst -> code (checks the reading, works out orders at risk): submit_brief (attempt 1)
+    {
+     "part_id": "BR-64",
+     "po_number": "PO-5531",
+     "schedule_changed": true,
+     "schedule_quote": "PO-5531 for 120 BR-64 burr sets will arrive 3 days after the scheduled date. The full quantity will ship together.",
+     "new_schedule": [
+      {
+       "qty": 120,
+       "day": 13,
+       "conversion": "the scheduled date of PO-5531 = day 10 (Thu 03 Dec 2026); + 3 days = day 13 (Sun 06 Dec 2026)"
+      }
+     ],
+     "options": [],
+     "supplier_questions": [
+      "Please let me know if this causes any problems on your side."
+     ],
+     "decisions_for_a_person": []
+    }
+
+==> HANDOFF  code -> analyst: result
+    Accepted.
+    (analyst used 4 of 10 tool calls, and submitted its brief 1 time(s))
+
+==> HANDOFF  analyst + code -> coordinator: brief (JSON, in full)
+    {
+     "part_id": "BR-64",
+     "po_number": "PO-5531",
+     "email_date": "The email has no usable Date header, so its date is taken as today, Mon 23 Nov 2026 (day 0).",
+     "what_changed": "The supplier wrote: \"PO-5531 for 120 BR-64 burr sets will arrive 3 days after the scheduled date. The full quantity will ship together.\" Resulting ship days: 120 units arrive on day 13 (the scheduled date of PO-5531 = day 10 (Thu 03 Dec 2026); + 3 days = day 13 (Sun 06 Dec 2026)).",
+     "schedule_quote": "PO-5531 for 120 BR-64 burr sets will arrive 3 days after the scheduled date. The full quantity will ship together.",
+     "new_schedule": [
+      {
+       "qty": 120,
+       "day": 13,
+       "conversion": "the scheduled date of PO-5531 = day 10 (Thu 03 Dec 2026); + 3 days = day 13 (Sun 06 Dec 2026)"
+      }
+     ],
+     "orders_at_risk": [],
+     "options": [],
+     "decisions_for_a_person": [],
+     "supplier_questions": [
+      "Please let me know if this causes any problems on your side."
+     ],
+     "worked_out_by": "Orders at risk and days late were calculated in code from the parts, bill of materials, inbound orders, customer orders, and the new ship days."
+    }
+
+======================================================================
+Step 2: customer notices - skipped: no orders at risk
+======================================================================
+
+======================================================================
+Step 3: reply to the supplier
+======================================================================
+
+==> HANDOFF  coordinator -> supplier writer: facts with no customer names, order IDs, or contract terms
+    {
+     "email": "From: Priya Raman <p.raman@ashgroveprecision.example>\nSubject: PO-5531 - BR-64 burr sets - arriving 3 days late\n\nHello,\n\nA heat-treatment furnace at our plant needed an unplanned repair, so PO-5531\nfor 120 BR-64 burr sets will arrive 3 days after the scheduled date. The full\nquantity will ship together.\n\nPlease let me know if this causes any problems on your side.\n\nBest,\nPriya Raman\nOrder Management, Ashgrove Precision",
+     "part_id": "BR-64",
+     "po_number": "PO-5531",
+     "what_changed": "The supplier wrote: \"PO-5531 for 120 BR-64 burr sets will arrive 3 days after the scheduled date. The full quantity will ship together.\" Resulting ship days: 120 units arrive on day 13 (the scheduled date of PO-5531 = day 10 (Thu 03 Dec 2026); + 3 days = day 13 (Sun 06 Dec 2026)).",
+     "new_schedule": [
+      {
+       "qty": 120,
+       "day": 13,
+       "conversion": "the scheduled date of PO-5531 = day 10 (Thu 03 Dec 2026); + 3 days = day 13 (Sun 06 Dec 2026)"
+      }
+     ],
+     "our_needs": {
+      "units_short_in_total": 0,
+      "needs": [],
+      "shortest_delay_days": null,
+      "longest_delay_days": null,
+      "never_covered": false
+     },
+     "options": [],
+     "supplier_questions": [
+      "Please let me know if this causes any problems on your side."
+     ],
+     "rules": [
+      "If the supplier asks who is affected or which orders, answer only with our needs: how many units we need by which day. Never give customer names, order numbers, or contract terms."
+     ]
+    }
+    [tokens] supplier writer: 1,065 in, 227 out (so far: 1,065 in, 227 out over 1 call(s))
+
+==> HANDOFF  supplier writer -> coordinator: draft
+    Subject: RE: PO-5531 - BR-64 burr sets - arriving 3 days late
+    
+    Hello Priya,
+    
+    Thank you for the update. To confirm: PO-5531 for 120 BR-64 burr sets will now arrive on day 13 (Sun 06 Dec 2026), 3 days later than scheduled, with the full quantity shipping together.
+    
+    Based on our current needs, this delay does not put us short on units or cause any disruption on our end.
+    
+    That said, if there is any way to ship even part of the quantity sooner, we'd welcome it to keep our buffer healthy. Please let us know if that's an option.
+    
+    Best regards,
+    Purchasing, Copperline Coffee Machines
+
+==> HANDOFF  code check -> coordinator: passed (no names, IDs, contract terms, or option choice)
+
+==> HANDOFF  coordinator -> reviewer: the draft to the supplier (shown above) + its facts
+    [tokens] reviewer: 1,226 in, 250 out (so far: 1,226 in, 250 out over 1 call(s))
+
+==> HANDOFF  reviewer -> coordinator: APPROVE
+
+    Saved week-05\drafts\copperline-coffee\03-ashgrove-burr-delay-pipeline-supplier-reply.txt  [ok]
+
+==> HANDOFF  review step -> coordinator: supplier draft saved (ok)
+
+FINAL DRAFT TO SUPPLIER
+Subject: RE: PO-5531 - BR-64 burr sets - arriving 3 days late
+
+Hello Priya,
+
+Thank you for the update. To confirm: PO-5531 for 120 BR-64 burr sets will now arrive on day 13 (Sun 06 Dec 2026), 3 days later than scheduled, with the full quantity shipping together.
+
+Based on our current needs, this delay does not put us short on units or cause any disruption on our end.
+
+That said, if there is any way to ship even part of the quantity sooner, we'd welcome it to keep our buffer healthy. Please let us know if that's an option.
+
+Best regards,
+Purchasing, Copperline Coffee Machines
+Marked for a person: no
+
+======================================================================
+Summary
+======================================================================
+Email: 03-ashgrove-burr-delay.eml
+
+Drafts saved: 1
+  supplier week-05\drafts\copperline-coffee\03-ashgrove-burr-delay-pipeline-supplier-reply.txt  (reviewer: APPROVE, 0 revision(s))
+
+Drafts marked for a person: 0
+
+Decisions for a person: 0
+
+Tokens used, by specialist:
+  analyst            5 call(s)     19,806 in    1,145 out
+  supplier writer    1 call(s)      1,065 in      227 out
+  reviewer           1 call(s)      1,226 in      250 out
+  total              7 call(s)     22,097 in    1,622 out
+
+Saved this output to week-05\runs\copperline-03-pipeline.txt

@@ -1,0 +1,25 @@
+Email:          02-marlow-boiler-options.eml
+Written by:     pipeline
+To:             supplier
+Reviewer:       APPROVE (after 0 revision(s))
+Code checks:    passed
+Late penalty:   yes
+NEEDS A PERSON: YES - an order it affects has a late penalty; the supplier offers options, and a person must choose
+------------------------------------------------------------
+Subject: RE: PO-5520 - BL-12 boilers - please choose a shipping option
+
+Hi Victor,
+
+Thanks for flagging this and for putting together two options.
+
+We've noted both:
+
+- Option A: 80 boilers on day 7 (the scheduled date), 120 boilers on day 21. Under this schedule, we would be short 5 units against our need, with a resulting delay of 4 days.
+- Option B: all 200 boilers on day 13 (6 days after the scheduled date). Under this schedule, we would be short 40 units against our need, with a resulting delay of 1 day.
+
+We won't select an option in this email — a member of our team will review both and confirm our choice by your deadline of three business days (Thu 26 Nov 2026).
+
+If there's any way to ship more units sooner under either option, that would help reduce the impact on our side — please let us know if that's possible.
+
+Regards,
+Purchasing, Copperline Coffee Machines

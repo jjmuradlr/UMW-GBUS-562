@@ -1,0 +1,28 @@
+Email:          01-danforth-pump-delay.eml
+Written by:     pipeline
+To:             supplier
+Reviewer:       APPROVE (after 0 revision(s))
+Code checks:    passed
+Late penalty:   yes
+NEEDS A PERSON: YES - an order it affects has a late penalty
+------------------------------------------------------------
+Subject: RE: PO-5512 - PU-20 pumps - partial shipment
+
+Hello Diane,
+
+Thank you for the update. To confirm our understanding: of the 200 PU-20 pumps on PO-5512, 40 units will arrive on day 4 (Fri 27 Nov 2026) as scheduled, with the remaining 160 units following on day 19 (Sat 12 Dec 2026).
+
+This revised schedule leaves us short by a total of 55 units against our needs, as follows:
+- 10 additional units needed by day 12
+- 20 additional units (30 total) needed by day 15
+- 25 additional units (55 total) needed by day 17
+
+Based on the new delivery dates, this results in delays ranging from 2 to 7 days against our requirements.
+
+Regarding your question about customer orders: we're not able to share customer names or order details. What we can tell you is the units-needed-by-date breakdown above — any way you could ship additional quantity sooner against those dates would directly reduce our delay.
+
+Please let us know if there's any way to expedite even a portion of the 160 units ahead of day 19.
+
+Best regards,
+
+Purchasing, Copperline Coffee Machines

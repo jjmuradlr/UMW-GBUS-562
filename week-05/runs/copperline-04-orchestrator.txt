@@ -1,0 +1,45 @@
+Email:   week-05\copperline-coffee\supplier-emails\04-pelham-maintenance-closure.eml
+Company: week-05\copperline-coffee (drafts go to week-05\drafts\copperline-coffee)
+Columns worked out from each header row:
+  parts.csv: part id=part_id, supplier=supplier, on hand=on_hand, description=description
+  inbound.csv: po number=po_number, part id=part_id, supplier=supplier, arrives in days=arrives_in_days, qty=qty
+  bill-of-materials.csv: part id=part_id, parts per unit=per_unit, product=product
+  orders.csv: order id=order_id, contact email=contact_email, customer=customer, late penalty=late_penalty, ship day=ship_by_day, product=product, quantity=units
+  suppliers.csv: contact email=contact_email, contact name=contact_name, supplier=supplier
+Model:   claude-sonnet-5 (orchestrator and specialists)
+    [tokens] orchestrator: 1,532 in, 498 out (so far: 1,532 in, 498 out over 1 call(s))
+
+======================================================================
+Choice 1 of at most 10: finish({"summary": "Pelham Fittings notified of a one-week plant maintenance shutdown starting in four weeks. They explicitly confirm our open order PO-5540 (60 SW-3 steam wands) ships before the closure and will arrive on schedule - no impact to delivery dates. No customer orders are at risk and no reply or notice is required. No action taken; filing for reference only.", "decision_needed": false})
+======================================================================
+
+==> HANDOFF  orchestrator -> finish: tool call
+    {
+     "summary": "Pelham Fittings notified of a one-week plant maintenance shutdown starting in four weeks. They explicitly confirm our open order PO-5540 (60 SW-3 steam wands) ships before the closure and will arrive on schedule - no impact to delivery dates. No customer orders are at risk and no reply or notice is required. No action taken; filing for reference only.",
+     "decision_needed": false
+    }
+
+==> HANDOFF  finish -> orchestrator: result
+    Finished.
+
+======================================================================
+Summary
+======================================================================
+Email: 04-pelham-maintenance-closure.eml
+Tool calls: 1 of at most 10
+
+Person must make a decision: no
+Orchestrator's summary:
+  Pelham Fittings notified of a one-week plant maintenance shutdown starting in four weeks. They explicitly confirm our open order PO-5540 (60 SW-3 steam wands) ships before the closure and will arrive on schedule - no impact to delivery dates. No customer orders are at risk and no reply or notice is required. No action taken; filing for reference only.
+
+Drafts saved: 0
+
+Drafts marked for a person: 0
+
+Decisions for a person: 0
+
+Tokens used, by specialist:
+  orchestrator       1 call(s)      1,532 in      498 out
+  total              1 call(s)      1,532 in      498 out
+
+Saved this output to week-05\runs\copperline-04-orchestrator.txt

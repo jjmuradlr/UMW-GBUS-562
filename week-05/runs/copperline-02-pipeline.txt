@@ -1,0 +1,357 @@
+Email:   week-05\copperline-coffee\supplier-emails\02-marlow-boiler-options.eml
+Company: week-05\copperline-coffee (drafts go to week-05\drafts\copperline-coffee)
+Columns worked out from each header row:
+  parts.csv: part id=part_id, supplier=supplier, on hand=on_hand, description=description
+  inbound.csv: po number=po_number, part id=part_id, supplier=supplier, arrives in days=arrives_in_days, qty=qty
+  bill-of-materials.csv: part id=part_id, parts per unit=per_unit, product=product
+  orders.csv: order id=order_id, contact email=contact_email, customer=customer, late penalty=late_penalty, ship day=ship_by_day, product=product, quantity=units
+  suppliers.csv: contact email=contact_email, contact name=contact_name, supplier=supplier
+Model:   claude-sonnet-5
+
+======================================================================
+Step 1: supply analyst
+======================================================================
+
+==> HANDOFF  coordinator -> analyst: supplier email
+    From: Victor Lindqvist <v.lindqvist@marlowmetal.example>
+    Subject: PO-5520 - BL-12 boilers - please choose a shipping option
+    
+    Hi,
+    
+    About PO-5520 for 200 BL-12 boilers: our welding cell is running at half
+    capacity this month, so we can't ship the whole order on time. We can offer
+    two options:
+    
+    Option A: Ship 80 boilers on the scheduled date, and the remaining 120 two
+    weeks after that.
+    
+    Option B: Ship all 200 boilers together, six days after the scheduled date.
+    
+    Please let us know which option you'd like within three business days. If we
+    don't hear from you by then, we'll go with Option B.
+    
+    Regards,
+    Victor Lindqvist
+    Sales Coordinator, Marlow Metalworks
+    [tokens] analyst: 3,476 in, 74 out (so far: 3,476 in, 74 out over 1 call(s))
+
+==> HANDOFF  analyst -> supply server (get_part): tool call 1
+    {
+     "part_id": "BL-12"
+    }
+
+==> HANDOFF  get_part -> analyst: result
+    {
+     "part_id": "BL-12",
+     "description": "1.2-liter boiler",
+     "supplier": "Marlow Metalworks",
+     "on_hand": 60,
+     "scheduled_shipments": [
+      {
+       "po_number": "PO-5520",
+       "supplier": "Marlow Metalworks",
+       "qty": 200,
+       "arrives_in_days": 7
+      }
+     ],
+     "used_in": [
+      {
+       "product": "Cafe One",
+       "parts_per_unit": 1
+      },
+      {
+       "product": "Cafe Duo",
+       "parts_per_unit": 2
+      }
+     ]
+    }
+    [tokens] analyst: 3,769 in, 894 out (so far: 7,245 in, 968 out over 2 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 2
+    {
+     "base_day": 7,
+     "base_label": "the scheduled date of PO-5520",
+     "add_days": 0,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": "Monday"
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); next Monday after that = day 14 (Mon 07 Dec 2026)
+
+==> HANDOFF  analyst -> code (convert_day): tool call 3
+    {
+     "base_day": 7,
+     "base_label": "the scheduled date of PO-5520",
+     "add_days": 0,
+     "add_weeks": 2,
+     "add_business_days": 0,
+     "next_weekday": ""
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 14 days = day 21 (Mon 14 Dec 2026)
+
+==> HANDOFF  analyst -> code (convert_day): tool call 4
+    {
+     "base_day": 7,
+     "base_label": "the scheduled date of PO-5520",
+     "add_days": 6,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": ""
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 6 days = day 13 (Sun 06 Dec 2026)
+
+==> HANDOFF  analyst -> code (convert_day): tool call 5
+    {
+     "base_day": 0,
+     "base_label": "the email's date",
+     "add_days": 0,
+     "add_weeks": 0,
+     "add_business_days": 3,
+     "next_weekday": ""
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the email's date = day 0 (Mon 23 Nov 2026); + 3 business days = day 3 (Thu 26 Nov 2026)
+    [tokens] analyst: 4,991 in, 254 out (so far: 12,236 in, 1,222 out over 3 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 6
+    {
+     "base_day": 7,
+     "base_label": "the scheduled date of PO-5520",
+     "add_days": 0,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": ""
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026)
+    [tokens] analyst: 5,282 in, 789 out (so far: 17,518 in, 2,011 out over 4 call(s))
+
+==> HANDOFF  analyst -> code (checks the reading, works out orders at risk): submit_brief (attempt 1)
+    {
+     "part_id": "BL-12",
+     "po_number": "PO-5520",
+     "schedule_changed": true,
+     "schedule_quote": "Option A: Ship 80 boilers on the scheduled date, and the remaining 120 two weeks after that. Option B: Ship all 200 boilers together, six days after the scheduled date.",
+     "new_schedule": [],
+     "options": [
+      {
+       "name": "Option A",
+       "quote": "Ship 80 boilers on the scheduled date, and the remaining 120 two weeks after that.",
+       "schedule": [
+        {
+         "qty": 80,
+         "day": 7,
+         "conversion": "the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026)"
+        },
+        {
+         "qty": 120,
+         "day": 21,
+         "conversion": "the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 14 days = day 21 (Mon 14 Dec 2026)"
+        }
+       ]
+      },
+      {
+       "name": "Option B",
+       "quote": "Ship all 200 boilers together, six days after the scheduled date.",
+       "schedule": [
+        {
+         "qty": 200,
+         "day": 13,
+         "conversion": "the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 6 days = day 13 (Sun 06 Dec 2026)"
+        }
+       ]
+      }
+     ],
+     "supplier_questions": [
+      "Please let us know which option you'd like within three business days (by Thu 26 Nov 2026). If we don't hear from you by then, we'll go with Option B."
+     ],
+     "decisions_for_a_person": [
+      "Choose between Option A (80 boilers on 30 Nov 2026, remaining 120 on 14 Dec 2026) and Option B (all 200 boilers on 06 Dec 2026) for PO-5520, and respond to the supplier by Thu 26 Nov 2026, otherwise Option B will be used by default."
+     ]
+    }
+
+==> HANDOFF  code -> analyst: result
+    Accepted.
+    (analyst used 6 of 10 tool calls, and submitted its brief 1 time(s))
+
+==> HANDOFF  analyst + code -> coordinator: brief (JSON, in full)
+    {
+     "part_id": "BL-12",
+     "po_number": "PO-5520",
+     "email_date": "The email has no usable Date header, so its date is taken as today, Mon 23 Nov 2026 (day 0).",
+     "what_changed": "The supplier offers options. Option A: the supplier wrote \"Ship 80 boilers on the scheduled date, and the remaining 120 two weeks after that.\" Resulting ship days: 80 units arrive on day 7 (the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026)); 120 units arrive on day 21 (the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 14 days = day 21 (Mon 14 Dec 2026)). Option B: the supplier wrote \"Ship all 200 boilers together, six days after the scheduled date.\" Resulting ship days: 200 units arrive on day 13 (the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 6 days = day 13 (Sun 06 Dec 2026)).",
+     "schedule_quote": "Option A: Ship 80 boilers on the scheduled date, and the remaining 120 two weeks after that. Option B: Ship all 200 boilers together, six days after the scheduled date.",
+     "new_schedule": [],
+     "orders_at_risk": [],
+     "options": [
+      {
+       "name": "Option A",
+       "quote": "Ship 80 boilers on the scheduled date, and the remaining 120 two weeks after that.",
+       "schedule": [
+        {
+         "qty": 80,
+         "day": 7,
+         "conversion": "the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026)"
+        },
+        {
+         "qty": 120,
+         "day": 21,
+         "conversion": "the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 14 days = day 21 (Mon 14 Dec 2026)"
+        }
+       ],
+       "order_ids_at_risk": [
+        "O-2205"
+       ],
+       "late_orders": [
+        {
+         "order_id": "O-2205",
+         "customer": "Tall Pines Coffee House",
+         "product": "Cafe One",
+         "quantity": 25,
+         "units_short": 5,
+         "ship_day": 17,
+         "ready_day": 21,
+         "days_late": 4,
+         "late_penalty": true
+        }
+       ]
+      },
+      {
+       "name": "Option B",
+       "quote": "Ship all 200 boilers together, six days after the scheduled date.",
+       "schedule": [
+        {
+         "qty": 200,
+         "day": 13,
+         "conversion": "the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 6 days = day 13 (Sun 06 Dec 2026)"
+        }
+       ],
+       "order_ids_at_risk": [
+        "O-2203"
+       ],
+       "late_orders": [
+        {
+         "order_id": "O-2203",
+         "customer": "Elm State University Dining",
+         "product": "Cafe One",
+         "quantity": 50,
+         "units_short": 40,
+         "ship_day": 12,
+         "ready_day": 13,
+         "days_late": 1,
+         "late_penalty": true
+        }
+       ]
+      }
+     ],
+     "decisions_for_a_person": [
+      "Choose between Option A (80 boilers on 30 Nov 2026, remaining 120 on 14 Dec 2026) and Option B (all 200 boilers on 06 Dec 2026) for PO-5520, and respond to the supplier by Thu 26 Nov 2026, otherwise Option B will be used by default."
+     ],
+     "supplier_questions": [
+      "Please let us know which option you'd like within three business days (by Thu 26 Nov 2026). If we don't hear from you by then, we'll go with Option B."
+     ],
+     "worked_out_by": "Orders at risk and days late were calculated in code from the parts, bill of materials, inbound orders, customer orders, and the new ship days."
+    }
+
+======================================================================
+Step 2: customer notices - skipped: no order is late under every option (a person chooses an option first)
+======================================================================
+
+======================================================================
+Step 3: reply to the supplier
+======================================================================
+
+==> HANDOFF  coordinator -> supplier writer: facts with no customer names, order IDs, or contract terms
+    {
+     "email": "From: Victor Lindqvist <v.lindqvist@marlowmetal.example>\nSubject: PO-5520 - BL-12 boilers - please choose a shipping option\n\nHi,\n\nAbout PO-5520 for 200 BL-12 boilers: our welding cell is running at half\ncapacity this month, so we can't ship the whole order on time. We can offer\ntwo options:\n\nOption A: Ship 80 boilers on the scheduled date, and the remaining 120 two\nweeks after that.\n\nOption B: Ship all 200 boilers together, six days after the scheduled date.\n\nPlease let us know which option you'd like within three business days. If we\ndon't hear from you by then, we'll go with Option B.\n\nRegards,\nVictor Lindqvist\nSales Coordinator, Marlow Metalworks",
+     "part_id": "BL-12",
+     "po_number": "PO-5520",
+     "what_changed": "The supplier offers options. Option A: the supplier wrote \"Ship 80 boilers on the scheduled date, and the remaining 120 two weeks after that.\" Resulting ship days: 80 units arrive on day 7 (the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026)); 120 units arrive on day 21 (the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 14 days = day 21 (Mon 14 Dec 2026)). Option B: the supplier wrote \"Ship all 200 boilers together, six days after the scheduled date.\" Resulting ship days: 200 units arrive on day 13 (the scheduled date of PO-5520 = day 7 (Mon 30 Nov 2026); + 6 days = day 13 (Sun 06 Dec 2026)).",
+     "new_schedule": [],
+     "our_needs": null,
+     "options": [
+      {
+       "name": "Option A",
+       "quote": "Ship 80 boilers on the schedul
+    ... (1,861 more characters)
+    [tokens] supplier writer: 1,894 in, 309 out (so far: 1,894 in, 309 out over 1 call(s))
+
+==> HANDOFF  supplier writer -> coordinator: draft
+    Subject: RE: PO-5520 - BL-12 boilers - please choose a shipping option
+    
+    Hi Victor,
+    
+    Thanks for flagging this and for putting together two options.
+    
+    We've noted both:
+    
+    - Option A: 80 boilers on day 7 (the scheduled date), 120 boilers on day 21. Under this schedule, we would be short 5 units against our need, with a resulting delay of 4 days.
+    - Option B: all 200 boilers on day 13 (6 days after the scheduled date). Under this schedule, we would be short 40 units against our need, with a resulting delay of 1 day.
+    
+    We won't select an option in this email — a member of our team will review both and confirm our choice by your deadline of three business days (Thu 26 Nov 2026).
+    
+    If there's any way to ship more units sooner under either option, that would help reduce the impact on our side — please let us know if that's possible.
+    
+    Regards,
+    Purchasing, Copperline Coffee Machines
+
+==> HANDOFF  code check -> coordinator: passed (no names, IDs, contract terms, or option choice)
+
+==> HANDOFF  coordinator -> reviewer: the draft to the supplier (shown above) + its facts
+    [tokens] reviewer: 2,148 in, 793 out (so far: 2,148 in, 793 out over 1 call(s))
+
+==> HANDOFF  reviewer -> coordinator: APPROVE
+
+    Saved week-05\drafts\copperline-coffee\02-marlow-boiler-options-pipeline-supplier-reply.txt  [NEEDS A PERSON]: an order it affects has a late penalty; the supplier offers options, and a person must choose
+
+==> HANDOFF  review step -> coordinator: supplier draft saved (NEEDS A PERSON)
+
+FINAL DRAFT TO SUPPLIER
+Subject: RE: PO-5520 - BL-12 boilers - please choose a shipping option
+
+Hi Victor,
+
+Thanks for flagging this and for putting together two options.
+
+We've noted both:
+
+- Option A: 80 boilers on day 7 (the scheduled date), 120 boilers on day 21. Under this schedule, we would be short 5 units against our need, with a resulting delay of 4 days.
+- Option B: all 200 boilers on day 13 (6 days after the scheduled date). Under this schedule, we would be short 40 units against our need, with a resulting delay of 1 day.
+
+We won't select an option in this email — a member of our team will review both and confirm our choice by your deadline of three business days (Thu 26 Nov 2026).
+
+If there's any way to ship more units sooner under either option, that would help reduce the impact on our side — please let us know if that's possible.
+
+Regards,
+Purchasing, Copperline Coffee Machines
+Marked for a person: yes
+
+======================================================================
+Summary
+======================================================================
+Email: 02-marlow-boiler-options.eml
+
+Drafts saved: 1
+  supplier week-05\drafts\copperline-coffee\02-marlow-boiler-options-pipeline-supplier-reply.txt  (reviewer: APPROVE, 0 revision(s))
+
+Drafts marked for a person: 1
+  week-05\drafts\copperline-coffee\02-marlow-boiler-options-pipeline-supplier-reply.txt: an order it affects has a late penalty; the supplier offers options, and a person must choose
+
+Decisions for a person: 1
+  1. Choose between Option A (80 boilers on 30 Nov 2026, remaining 120 on 14 Dec 2026) and Option B (all 200 boilers on 06 Dec 2026) for PO-5520, and respond to the supplier by Thu 26 Nov 2026, otherwise Option B will be used by default.
+
+Tokens used, by specialist:
+  analyst            4 call(s)     17,518 in    2,011 out
+  supplier writer    1 call(s)      1,894 in      309 out
+  reviewer           1 call(s)      2,148 in      793 out
+  total              6 call(s)     21,560 in    3,113 out
+
+Saved this output to week-05\runs\copperline-02-pipeline.txt

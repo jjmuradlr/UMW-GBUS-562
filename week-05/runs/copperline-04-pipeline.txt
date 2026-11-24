@@ -1,0 +1,189 @@
+Email:   week-05\copperline-coffee\supplier-emails\04-pelham-maintenance-closure.eml
+Company: week-05\copperline-coffee (drafts go to week-05\drafts\copperline-coffee)
+Columns worked out from each header row:
+  parts.csv: part id=part_id, supplier=supplier, on hand=on_hand, description=description
+  inbound.csv: po number=po_number, part id=part_id, supplier=supplier, arrives in days=arrives_in_days, qty=qty
+  bill-of-materials.csv: part id=part_id, parts per unit=per_unit, product=product
+  orders.csv: order id=order_id, contact email=contact_email, customer=customer, late penalty=late_penalty, ship day=ship_by_day, product=product, quantity=units
+  suppliers.csv: contact email=contact_email, contact name=contact_name, supplier=supplier
+Model:   claude-sonnet-5
+
+======================================================================
+Step 1: supply analyst
+======================================================================
+
+==> HANDOFF  coordinator -> analyst: supplier email
+    From: Owen Brady <o.brady@pelhamfittings.example>
+    Subject: Plant maintenance closure - PO-5540 not affected
+    
+    Hello,
+    
+    A quick note for your planning: our plant will close for one week of annual
+    maintenance, starting four weeks from today.
+    
+    Your open order, PO-5540 for 60 SW-3 steam wands, ships before the closure
+    and will arrive on the scheduled date. No action is needed on your side.
+    
+    Kind regards,
+    Owen Brady
+    Customer Care, Pelham Fittings
+    [tokens] analyst: 3,391 in, 98 out (so far: 3,391 in, 98 out over 1 call(s))
+
+==> HANDOFF  analyst -> supply server (get_part): tool call 1
+    {
+     "part_id": "SW-3"
+    }
+
+==> HANDOFF  get_part -> analyst: result
+    {
+     "part_id": "SW-3",
+     "description": "Steam wand",
+     "supplier": "Pelham Fittings",
+     "on_hand": 40,
+     "scheduled_shipments": [
+      {
+       "po_number": "PO-5540",
+       "supplier": "Pelham Fittings",
+       "qty": 60,
+       "arrives_in_days": 11
+      }
+     ],
+     "used_in": [
+      {
+       "product": "Cafe Duo",
+       "parts_per_unit": 1
+      }
+     ]
+    }
+    [tokens] analyst: 3,670 in, 232 out (so far: 7,061 in, 330 out over 2 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 2
+    {
+     "base_day": 11,
+     "base_label": "the scheduled date of PO-5540",
+     "add_days": 0,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": "Thursday"
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5540 = day 11 (Fri 04 Dec 2026); next Thursday after that = day 17 (Thu 10 Dec 2026)
+    [tokens] analyst: 3,964 in, 237 out (so far: 11,025 in, 567 out over 3 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 3
+    {
+     "base_day": 11,
+     "base_label": "the scheduled date of PO-5540",
+     "add_days": 0,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": "Thursday"
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5540 = day 11 (Fri 04 Dec 2026); next Thursday after that = day 17 (Thu 10 Dec 2026)
+    [tokens] analyst: 4,263 in, 222 out (so far: 15,288 in, 789 out over 4 call(s))
+
+==> HANDOFF  analyst -> code (convert_day): tool call 4
+    {
+     "base_day": 11,
+     "base_label": "the scheduled date of PO-5540",
+     "add_days": 0,
+     "add_weeks": 0,
+     "add_business_days": 0,
+     "next_weekday": ""
+    }
+
+==> HANDOFF  convert_day -> analyst: result
+    the scheduled date of PO-5540 = day 11 (Fri 04 Dec 2026)
+    [tokens] analyst: 4,522 in, 355 out (so far: 19,810 in, 1,144 out over 5 call(s))
+
+==> HANDOFF  analyst -> code (checks the reading, works out orders at risk): submit_brief (attempt 1)
+    {
+     "part_id": "SW-3",
+     "po_number": "PO-5540",
+     "schedule_changed": false,
+     "schedule_quote": "Your open order, PO-5540 for 60 SW-3 steam wands, ships before the closure and will arrive on the scheduled date.",
+     "new_schedule": [],
+     "options": [],
+     "supplier_questions": [],
+     "decisions_for_a_person": []
+    }
+
+==> HANDOFF  code -> analyst: result
+    Accepted.
+    (analyst used 4 of 10 tool calls, and submitted its brief 1 time(s))
+
+==> HANDOFF  analyst + code -> coordinator: brief (JSON, in full)
+    {
+     "part_id": "SW-3",
+     "po_number": "PO-5540",
+     "email_date": "The email has no usable Date header, so its date is taken as today, Mon 23 Nov 2026 (day 0).",
+     "what_changed": "The supplier wrote: \"Your open order, PO-5540 for 60 SW-3 steam wands, ships before the closure and will arrive on the scheduled date.\" This doesn't change any ship day: 60 units still arrive on day 11.",
+     "schedule_quote": "Your open order, PO-5540 for 60 SW-3 steam wands, ships before the closure and will arrive on the scheduled date.",
+     "new_schedule": [],
+     "orders_at_risk": [],
+     "options": [],
+     "decisions_for_a_person": [],
+     "supplier_questions": [],
+     "worked_out_by": "Orders at risk and days late were calculated in code from the parts, bill of materials, inbound orders, customer orders, and the new ship days."
+    }
+
+======================================================================
+Step 2: customer notices - skipped: no orders at risk
+======================================================================
+
+======================================================================
+Step 3: reply to the supplier
+======================================================================
+
+==> HANDOFF  coordinator -> supplier writer: facts with no customer names, order IDs, or contract terms
+    {
+     "email": "From: Owen Brady <o.brady@pelhamfittings.example>\nSubject: Plant maintenance closure - PO-5540 not affected\n\nHello,\n\nA quick note for your planning: our plant will close for one week of annual\nmaintenance, starting four weeks from today.\n\nYour open order, PO-5540 for 60 SW-3 steam wands, ships before the closure\nand will arrive on the scheduled date. No action is needed on your side.\n\nKind regards,\nOwen Brady\nCustomer Care, Pelham Fittings",
+     "part_id": "SW-3",
+     "po_number": "PO-5540",
+     "what_changed": "The supplier wrote: \"Your open order, PO-5540 for 60 SW-3 steam wands, ships before the closure and will arrive on the scheduled date.\" This doesn't change any ship day: 60 units still arrive on day 11.",
+     "new_schedule": [],
+     "our_needs": {
+      "units_short_in_total": 0,
+      "needs": [],
+      "shortest_delay_days": null,
+      "longest_delay_days": null,
+      "never_covered": false
+     },
+     "options": [],
+     "supplier_questions": [],
+     "rules": [
+      "If the supplier asks who is affected or which orders, answer only with our needs: how many units we need by which day. Never give customer names, order numbers, or contract terms."
+     ]
+    }
+    [tokens] supplier writer: 895 in, 13 out (so far: 895 in, 13 out over 1 call(s))
+
+==> HANDOFF  supplier writer -> coordinator: draft
+    NO REPLY NEEDED
+
+    Supplier writer: no reply needed; nothing saved.
+
+FINAL DRAFT TO SUPPLIER
+NO REPLY NEEDED
+Marked for a person: no
+
+======================================================================
+Summary
+======================================================================
+Email: 04-pelham-maintenance-closure.eml
+
+Drafts saved: 0
+  (the supplier writer found no reply needed; nothing saved for the supplier)
+
+Drafts marked for a person: 0
+
+Decisions for a person: 0
+
+Tokens used, by specialist:
+  analyst            5 call(s)     19,810 in    1,144 out
+  supplier writer    1 call(s)        895 in       13 out
+  total              6 call(s)     20,705 in    1,157 out
+
+Saved this output to week-05\runs\copperline-04-pipeline.txt

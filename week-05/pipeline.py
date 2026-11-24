@@ -1,16 +1,19 @@
-"""pipeline.py - Brookfield's response to one supplier email, in a fixed order.
+"""pipeline.py - a company's response to one supplier email, in a fixed order.
 
 Runs the specialists from specialists.py, always in this order:
     1. The supply analyst (an agent with the supply MCP server's tools).
     2. A customer notice for each order at risk (skipped if there are none).
     3. A reply to the supplier.
 Every draft goes through the review step (review, at most 2 revisions, a name check in
-code) and is saved in week-05/drafts, with "pipeline" in its file name. At the end it prints a summary: drafts saved,
-drafts marked for a person, decisions for a person, and total tokens.
+code), is printed once as its final draft, and is saved in week-05/drafts/<company>,
+with "pipeline" in its file name. At the end it prints a summary: drafts saved, drafts
+marked for a person, decisions for a person, and total tokens.
 
 Usage (from the top of the repository):
     .venv\\Scripts\\python.exe week-05\\pipeline.py --email week-05\\brookfield-bikes\\supplier-emails\\01-northgate-controller-delay.eml
+    .venv\\Scripts\\python.exe week-05\\pipeline.py --org copperline-coffee --email week-05\\copperline-coffee\\supplier-emails\\01-danforth-pump-delay.eml
     ... --save run.txt      also writes everything printed to run.txt (UTF-8)
+    --org names the company folder (a name under week-05 or a path; default brookfield-bikes).
 """
 
 from __future__ import annotations
@@ -78,10 +81,18 @@ def print_summary(label: str, drafts: list[sp.Draft], brief: dict, error: str | 
     sp.print_token_totals()
 
 
+def print_header(email_path: Path, model_note: str = "") -> None:
+    """The start of a run: the email, the company folder and its columns, the model."""
+    print(f"Email:   {sp.shown_path(email_path)}")
+    print(f"Company: {sp.shown_path(sp.DATA_DIR)} (drafts go to {sp.shown_path(sp.DRAFTS_DIR)})")
+    print("Columns worked out from each header row:")
+    print("\n".join(sp.describe_columns()))
+    print(f"Model:   {sp.MODEL}{model_note}")
+
+
 async def run(email_path: Path) -> int:
     sp.reset_tokens()
-    print(f"Email: {sp.shown_path(email_path)}")
-    print(f"Model: {sp.MODEL}")
+    print_header(email_path)
     email = sp.load_email(email_path)
     label = email_path.name
     drafts: list[sp.Draft] = []
@@ -97,6 +108,9 @@ async def run(email_path: Path) -> int:
             step(2, f"customer notices ({len(orders)} order(s) at risk)")
             for order in orders:
                 drafts.append(await sp.reviewed_customer_notice(order, label, script="pipeline"))
+        elif brief.get("options"):
+            step(2, "customer notices - skipped: no order is late under every option "
+                    "(a person chooses an option first)")
         else:
             step(2, "customer notices - skipped: no orders at risk")
 
@@ -116,11 +130,18 @@ def cli(description: str, run_fn) -> None:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--email", required=True, metavar="PATH", help="path of one supplier email (.eml)")
     parser.add_argument("--save", metavar="FILE", help="also write everything printed to this text file (UTF-8)")
+    parser.add_argument("--org", metavar="FOLDER",
+                        help="company folder: a name under week-05 (like copperline-coffee) or a path "
+                             "(default: brookfield-bikes)")
     args = parser.parse_args()
 
     email_path = Path(args.email)
     if not email_path.is_file():
         parser.error(f"no such email file: {args.email}")
+    try:
+        sp.set_org(args.org)
+    except ValueError as e:
+        parser.error(str(e))
 
     for stream in (sys.stdout, sys.stderr):  # don't crash on characters the console can't show
         if hasattr(stream, "reconfigure"):
@@ -147,7 +168,7 @@ def cli(description: str, run_fn) -> None:
 
 
 def main() -> None:
-    cli("Run Brookfield's specialists on one supplier email, in a fixed order.", run)
+    cli("Run a company's specialists on one supplier email, in a fixed order.", run)
 
 
 if __name__ == "__main__":

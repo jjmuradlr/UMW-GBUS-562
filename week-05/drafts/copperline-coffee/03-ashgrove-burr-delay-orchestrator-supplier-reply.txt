@@ -1,0 +1,20 @@
+Email:          03-ashgrove-burr-delay.eml
+Written by:     orchestrator
+To:             supplier
+Reviewer:       APPROVE (after 0 revision(s))
+Code checks:    passed
+Late penalty:   no
+NEEDS A PERSON: no
+------------------------------------------------------------
+Subject: RE: PO-5531 - BR-64 burr sets - arriving 3 days late
+
+Hello Priya,
+
+Thank you for the update. To confirm: all 120 BR-64 burr sets under PO-5531 will now arrive on day 13 (Sun 06 Dec 2026) instead of the original day 10 (Thu 03 Dec 2026), shipping together as one full shipment.
+
+Based on our current needs, this delay does not put us short on units or cause a disruption on our side.
+
+That said, if there's any way to ship even part of the order sooner, we'd welcome it to keep our buffer healthy. Please let us know if that's possible.
+
+Best regards,
+Purchasing, Copperline Coffee Machines
