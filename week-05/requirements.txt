@@ -1,0 +1,4 @@
+# Packages for week-05. Install into the repo's .venv:
+#   .venv\Scripts\python.exe -m pip install -r week-05\requirements.txt
+mcp==2.3.0              # official Model Context Protocol Python SDK (supply_mcp_server.py)
+pydantic==2.14.3        # typed tool inputs (check_coverage arrivals); also required by mcp

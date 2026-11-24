@@ -1,0 +1,23 @@
+Email:          02-kendall-tire-options.eml
+Written by:     orchestrator
+To:             supplier
+Reviewer:       APPROVE (after 0 revision(s))
+Name check:     passed
+Late penalty:   no
+NEEDS A PERSON: no
+------------------------------------------------------------
+Subject: RE: PO-7795 - TR-29 tires - two options, please choose
+
+Hi Lisa,
+
+Thank you for flagging this. To confirm our understanding: Option 1 would ship 160 tires on day 8 and the remaining 240 on day 22, while Option 2 would hold the full 400 and ship together on day 12.
+
+On our end, Option 2 would leave one of our orders 40 units short and 3 days delayed against its ready date. Option 1 does not create this issue, so it's the more favorable path for us currently.
+
+Is there any way to pull the day 22 portion of Option 1 closer, or to ship a partial quantity sooner than day 12 under Option 2? Either would help reduce the impact.
+
+We will confirm our final decision within the two business days you requested.
+
+Thanks for your flexibility here.
+
+Purchasing, Brookfield Bicycle Company

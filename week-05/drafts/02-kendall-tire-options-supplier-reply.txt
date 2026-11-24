@@ -1,0 +1,22 @@
+Email:          02-kendall-tire-options.eml
+To:             supplier
+Reviewer:       APPROVE (after 0 revision(s))
+Name check:     passed
+Late penalty:   no
+NEEDS A PERSON: no
+------------------------------------------------------------
+Subject: RE: PO-7795 - TR-29 tires - two options, please choose
+
+Hi Lisa,
+
+Thank you for the update on PO-7795. We understand the mixing machine issue is limiting you to two options for the 400 TR-29 tires:
+
+- Option 1: 160 tires on the scheduled date (day 8), remaining 240 on day 22.
+- Option 2: All 400 tires together on day 12.
+
+For our planning: Option 2 would leave one of our orders short by 40 units for 3 days. Option 1 does not create any shortage on our end.
+
+We will confirm our choice within your two-business-day deadline. In the meantime, please let us know if there's any way to ship more tires sooner than either option currently allows, as that would help reduce the impact further.
+
+Thanks,
+Purchasing, Brookfield Bicycle Company

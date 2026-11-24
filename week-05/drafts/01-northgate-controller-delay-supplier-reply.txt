@@ -1,0 +1,22 @@
+Email:          01-northgate-controller-delay.eml
+To:             supplier
+Reviewer:       APPROVE (after 0 revision(s))
+Name check:     passed
+Late penalty:   yes
+NEEDS A PERSON: YES - its order has a late penalty
+------------------------------------------------------------
+Subject: RE: PO-7781 - MC-500 controllers - revised shipment schedule
+
+Hello Karen,
+
+Thank you for the heads-up. To confirm our understanding: of the 400 MC-500 controllers on PO-7781, 120 units will ship on day 5 as originally scheduled, with the remaining 280 units arriving on day 26 instead of day 5.
+
+On our side, this shortfall affects three downstream orders, totaling 90 units short across them, with delays ranging from 5 to 12 days past their original ship dates. This includes one order where a late penalty applies.
+
+We're not able to share details on which customers are affected. We also can't commit to accepting this revised schedule as final at this time - we'll confirm our position by the end of this week.
+
+In the meantime, please let us know if there's any way to pull the remaining 280 units in sooner, even a partial early shipment would help reduce the impact. We're glad to discuss options on a call if that would help move things along.
+
+Thank you for flagging this early.
+
+Purchasing, Brookfield Bicycle Company

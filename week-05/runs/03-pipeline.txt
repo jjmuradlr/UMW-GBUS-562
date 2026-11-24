@@ -1,0 +1,210 @@
+Email: week-05\brookfield-bikes\supplier-emails\03-keystone-on-schedule.eml
+Model: claude-sonnet-5
+
+======================================================================
+Step 1: supply analyst
+======================================================================
+
+==> HANDOFF  coordinator -> analyst: supplier email
+    From: Brian Foley <b.foley@keystonebattery.example>
+    Subject: PO-7790 - BP-48 battery packs - shipped on schedule
+    
+    Hello,
+    
+    Good news: PO-7790 for 150 BP-48 battery packs left our warehouse today and is
+    on track to arrive on the scheduled date. No action is needed on your side.
+    
+    Best regards,
+    Brian Foley
+    Order Desk, Keystone Battery Co.
+    [tokens] analyst: 1,790 in, 312 out (so far: 1,790 in, 312 out over 1 call(s))
+
+==> HANDOFF  analyst -> supply server (get_part): tool call 1
+    {
+     "part_id": "BP-48"
+    }
+
+==> HANDOFF  supply server (get_part) -> analyst: result
+    {
+     "part_id": "BP-48",
+     "description": "48-volt battery pack",
+     "supplier": "Keystone Battery Co.",
+     "on_hand": 35,
+     "scheduled_shipments": [
+      {
+       "po_number": "PO-7790",
+       "supplier": "Keystone Battery Co.",
+       "qty": 150,
+       "arrives_in_days": 6
+      }
+     ],
+     "used_in": [
+      {
+       "model": "Cargo E",
+       "parts_per_bike": 1
+      }
+     ]
+    }
+
+==> HANDOFF  analyst -> supply server (get_orders_for_part): tool call 2
+    {
+     "part_id": "BP-48"
+    }
+
+==> HANDOFF  supply server (get_orders_for_part) -> analyst: result
+    {
+     "part_id": "BP-48",
+     "orders": [
+      {
+       "order_id": "O-1042",
+       "customer": "Blue Ridge Bike Shop",
+       "model": "Cargo E",
+       "bikes": 30,
+       "parts_per_bike": 1,
+       "units_needed": 30,
+       "ship_day": 10,
+       "late_penalty": true
+      },
+      {
+       "order_id": "O-1044",
+       "customer": "Main Street Bikes",
+       "model": "Cargo E",
+       "bikes": 30,
+       "parts_per_bike": 1,
+       "units_needed": 30,
+       "ship_day": 18,
+       "late_penalty": false
+      },
+      {
+       "order_id": "O-1048",
+       "customer": "Bayside Cycle Co.",
+       "model": "Cargo E",
+       "bikes": 20,
+       "parts_per_bike": 1,
+       "units_needed": 20,
+       "ship_day": 28,
+       "late_penalty": false
+      }
+     ]
+    }
+    [tokens] analyst: 2,688 in, 145 out (so far: 4,478 in, 457 out over 2 call(s))
+
+==> HANDOFF  analyst -> supply server (check_coverage): tool call 3
+    {
+     "part_id": "BP-48",
+     "arrivals": [
+      {
+       "qty": 150,
+       "day": 6
+      }
+     ]
+    }
+
+==> HANDOFF  supply server (check_coverage) -> analyst: result
+    {
+     "part_id": "BP-48",
+     "on_hand": 35,
+     "arrivals_checked": [
+      {
+       "qty": 150,
+       "day": 6
+      }
+     ],
+     "replaced_shipments": [
+      {
+       "po_number": "PO-7790",
+       "supplier": "Keystone Battery Co.",
+       "qty": 150,
+       "arrives_in_days": 6
+      }
+     ],
+     "fill_rule": "orders filled complete, in ship-day order",
+     "all_covered": true,
+     "orders": [
+      {
+       "order_id": "O-1042",
+       "customer": "Blue Ridge Bike Shop",
+       "model": "Cargo E",
+       "units_needed": 30,
+       "ship_day": 10,
+       "late_penalty": true,
+       "covered": true
+      },
+      {
+       "order_id": "O-1044",
+       "customer": "Main Street Bikes",
+       "model": "Cargo E",
+       "units_needed": 30,
+       "ship_day": 18,
+       "late_penalty": false,
+       "covered": true
+      },
+      {
+       "order_id": "O-1048",
+       "customer": "Bayside Cycle Co.",
+       "model": "Cargo E",
+       "units_needed": 20,
+       "ship_day": 28,
+       "late_penalty": false,
+       "covered": true
+      }
+     ]
+    }
+    [tokens] analyst: 3,293 in, 122 out (so far: 7,771 in, 579 out over 3 call(s))
+    (analyst used 3 of 10 tool calls)
+
+==> HANDOFF  analyst -> coordinator: brief (JSON)
+    {
+     "part_id": "BP-48",
+     "what_changed": "No change: PO-7790's 150 BP-48 battery packs remain on schedule to arrive in 6 days, as originally planned.",
+     "orders_at_risk": [],
+     "options": [],
+     "decisions_for_a_person": [],
+     "supplier_questions": []
+    }
+
+======================================================================
+Step 2: customer notices - skipped: no orders at risk
+======================================================================
+
+======================================================================
+Step 3: reply to the supplier
+======================================================================
+
+==> HANDOFF  coordinator -> supplier writer: email + brief, customer names removed
+    {
+     "email": "From: Brian Foley <b.foley@keystonebattery.example>\nSubject: PO-7790 - BP-48 battery packs - shipped on schedule\n\nHello,\n\nGood news: PO-7790 for 150 BP-48 battery packs left our warehouse today and is\non track to arrive on the scheduled date. No action is needed on your side.\n\nBest regards,\nBrian Foley\nOrder Desk, Keystone Battery Co.",
+     "brief": {
+      "part_id": "BP-48",
+      "what_changed": "No change: PO-7790's 150 BP-48 battery packs remain on schedule to arrive in 6 days, as originally planned.",
+      "orders_at_risk": [],
+      "options": [],
+      "decisions_for_a_person": [],
+      "supplier_questions": []
+     }
+    }
+    [tokens] supplier writer: 616 in, 13 out (so far: 616 in, 13 out over 1 call(s))
+
+==> HANDOFF  supplier writer -> coordinator: draft
+    NO REPLY NEEDED
+
+    Supplier writer: no reply needed; nothing saved.
+
+======================================================================
+Summary
+======================================================================
+Email: 03-keystone-on-schedule.eml
+
+Drafts saved: 0
+  (the supplier writer found no reply needed; nothing saved for the supplier)
+
+Drafts marked for a person: 0
+
+Decisions for a person: 0
+
+Tokens used, by specialist:
+  analyst            3 call(s)      7,771 in      579 out
+  supplier writer    1 call(s)        616 in       13 out
+  total              4 call(s)      8,387 in      592 out
+
+Saved this output to week-05\runs\03-pipeline.txt
